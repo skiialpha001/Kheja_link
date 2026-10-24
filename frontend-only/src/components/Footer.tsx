@@ -167,7 +167,16 @@ export default function Footer() {
           <div className="space-y-1 text-center md:text-left">
             <p>&copy; {new Date().getFullYear()} KHEJA_LINK. Built for the modern seeker.</p>
             <p className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-600">
-              Developed by <span className="text-blue-500">ralph_tech</span>
+              Developed by <span className="text-blue-500">ralph_tech</span> and{" "}
+              <a
+                href="https://gikunjucreates.work.gd/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Peter Gikunju portfolio (gikunjucreates)"
+                className="text-blue-500 hover:text-blue-400 underline underline-offset-4"
+              >
+                gikunjucreates
+              </a>
             </p>
           </div>
           <div className="flex gap-10">
