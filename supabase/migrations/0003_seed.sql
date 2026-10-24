@@ -70,12 +70,7 @@ on conflict (slug) do update
 -- Demo landlord + the twelve original design listings.
 --
 -- The listings need an owner, and owner_id must point at a real auth user.
--- We create one demo landlord account if it does not already exist:
---
---     email:    demo.landlord@khejalink.co.ke
---     password: KhejaDemo2026!
---
--- >>> Delete this account (or change its password) before going live. <<<
+-- We create a disabled demo landlord account so the listings have an owner.
 -- -----------------------------------------------------------------------------
 set search_path = public, extensions;
 
@@ -98,6 +93,7 @@ begin
       id, instance_id, aud, role, email, encrypted_password,
       email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
       created_at, updated_at,
+      banned_until,
       confirmation_token, recovery_token,
       email_change, email_change_token_new, email_change_token_current
     ) values (
@@ -106,11 +102,12 @@ begin
       'authenticated',
       'authenticated',
       'demo.landlord@khejalink.co.ke',
-      crypt('KhejaDemo2026!', gen_salt('bf')),
+      crypt(encode(gen_random_bytes(32), 'hex'), gen_salt('bf')),
       now(),
       '{"provider":"email","providers":["email"]}'::jsonb,
       '{"full_name":"Kheja_Link Demo Landlord","role":"landlord"}'::jsonb,
       now(), now(),
+      '2099-12-31 23:59:59+00'::timestamptz,
       '', '', '', '', ''
     );
 
@@ -129,6 +126,15 @@ begin
       now(), now(), now()
     )
     on conflict do nothing;
+  else
+    -- Older setup runs created this account with a published demo password.
+    -- Lock it and revoke its refresh sessions while preserving sample listings.
+    update auth.users
+       set encrypted_password = crypt(encode(gen_random_bytes(32), 'hex'), gen_salt('bf')),
+           banned_until = '2099-12-31 23:59:59+00'::timestamptz,
+           updated_at = now()
+     where id = v_owner;
+    delete from auth.sessions where user_id = v_owner;
   end if;
 
   -- The on_auth_user_created trigger creates the profile; make sure it exists

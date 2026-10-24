@@ -6,10 +6,11 @@
 
 -- Supabase installs extensions into either public or extensions depending on the
 -- project's age, so keep both on the path for this script.
+create schema if not exists extensions;
 set search_path = public, extensions;
 
 create extension if not exists "pgcrypto";
-create extension if not exists "unaccent";
+create extension if not exists "unaccent" with schema extensions;
 
 -- -----------------------------------------------------------------------------
 -- Enums

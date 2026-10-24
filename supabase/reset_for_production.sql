@@ -5,7 +5,7 @@
 -- setup.sql. It permanently deletes data and cannot be undone — take a backup
 -- first (Supabase → Database → Backups) if you might want anything back.
 --
--- It deletes every account except the demo landlord, and everything those
+-- It deletes every account except the disabled demo landlord, and everything those
 -- accounts made: their listings, favourites, unlocks, payments, refunds,
 -- houses, requests, alerts, messages and notifications. It then clears the
 -- remaining activity on the demo landlord's sample listings (views, likes,
@@ -21,6 +21,7 @@
 -- =============================================================================
 
 begin;
+set local search_path = public, extensions;
 
 -- The account whose sample listings stay.
 create temporary table keep_users on commit drop as
@@ -31,6 +32,14 @@ do $$ begin
     raise exception 'The demo landlord account was not found — nothing was deleted.';
   end if;
 end $$;
+
+-- Keep the sample listing owner but make the published demo credentials unusable.
+update auth.users
+   set encrypted_password = crypt(encode(gen_random_bytes(32), 'hex'), gen_salt('bf')),
+       banned_until = '2099-12-31 23:59:59+00'::timestamptz,
+       updated_at = now()
+ where id in (select id from keep_users);
+delete from auth.sessions where user_id in (select id from keep_users);
 
 -- Activity on the listings that stay. Most of this would go with the deleted
 -- accounts anyway; guests' rows (no account) would not, so clear it all.
