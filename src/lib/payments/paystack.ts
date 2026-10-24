@@ -132,6 +132,7 @@ export async function paystack<T>(
         "Content-Type": "application/json",
       },
       body: init?.body ? JSON.stringify(init.body) : undefined,
+      signal: AbortSignal.timeout(15_000),
       cache: "no-store",
     });
 
