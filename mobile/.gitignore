@@ -44,8 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Kheja_Link
-.env
+# Environment files
+.env*
+!.env.example
+
+# Kheja_Link signing
 *.jks
 *.keystore
 android/key.properties

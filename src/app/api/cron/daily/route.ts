@@ -2,17 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 /**
- * The scheduled job. Called by Vercel Cron (vercel.json) and by the GitHub
- * Actions keep-alive workflow.
+ * The scheduled keep-alive ping. Database maintenance runs inside pg_cron,
+ * where it does not need an exposed SECURITY DEFINER RPC.
  *
  *   1. Keep-alive: real queries against the Supabase API. A free Supabase
  *      project is paused after a week without activity; this is activity.
- *   2. run_daily_maintenance(): opens homes whose vacancy date has arrived
- *      (which notifies waiting tenants in their in-app Inbox) and expires
- *      abandoned checkouts. Throttled to once an hour in the database.
- *
- * Both are harmless to repeat. If CRON_SECRET is set (Vercel sends it as a
- * bearer token), the request must carry it. Kheja_Link sends no email or SMS.
+ * A secret is required even though this endpoint only performs a safe ping.
  */
 
 export const dynamic = "force-dynamic";
@@ -26,24 +21,23 @@ export async function GET(request: Request) {
   }
 
   const secret = process.env.CRON_SECRET;
-  if (secret && request.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (!secret) {
+    return NextResponse.json({ ok: false, error: "Cron authentication is not configured." }, { status: 503 });
+  }
+  if (request.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ ok: false, error: "Unauthorised." }, { status: 401 });
   }
 
   const db = createClient(url, anonKey, { auth: { persistSession: false } });
 
-  const [ping, maintenance] = await Promise.all([
-    db.from("property_types").select("id", { head: true, count: "exact" }),
-    db.rpc("run_daily_maintenance"),
-  ]);
+  const ping = await db.from("property_types").select("id", { head: true, count: "exact" });
 
-  const ok = !ping.error && !maintenance.error;
+  const ok = !ping.error;
   return NextResponse.json(
     {
       ok,
       at: new Date().toISOString(),
       keepAlive: ping.error ? "failed" : "ok",
-      maintenance: maintenance.error ? "failed" : maintenance.data,
     },
     { status: ok ? 200 : 502 },
   );

@@ -60,13 +60,9 @@ locations, amenities and twelve demo listings).
 
 It is idempotent — running it again is safe.
 
-The seed creates a demo landlord so the dashboard is not empty:
-
-```
-demo.landlord@khejalink.co.ke  /  KhejaDemo2026!
-```
-
-**Delete that account before going live.**
+The seed creates a demo landlord for the sample listings. Its sign-in is disabled
+and it has no published password; keep it disabled in production or remove it
+along with the sample listings.
 
 ### 4. Configure auth redirects
 
@@ -197,6 +193,8 @@ from a pre-launch security review:
 
 - **Sign-up can no longer create an admin.** The role in sign-up metadata is clamped to tenant
   or landlord, and a guard stops any non-admin writing a privileged profile row.
+- **Admin database access requires MFA.** Admin role checks require a verified TOTP session
+  (`aal2`); the web back office prompts admins to enroll or verify before it loads.
 - **Landlord phone numbers are no longer public.** `profiles` is readable only by its owner and
   admins; everyone else reads `public_profiles` (name, avatar, badge).
 - **The location is locked.** Everyone sees the area and the landlord's description of the
@@ -215,9 +213,9 @@ the signed-in owner of the payment, and the Android app disables backups and cle
 ### Going live: reset the data
 
 [`supabase/reset_for_production.sql`](supabase/reset_for_production.sql) is **not** a migration.
-Run it once, by hand, after 0016: it deletes every account except the demo landlord (and all
-their activity), keeps the demo landlord's sample listings, areas, types, amenities, providers
-and prices, then shows how to make your own account the admin.
+Run it once, by hand, after 0016: it deletes every account except the disabled demo landlord
+(and all their activity), keeps the demo landlord's sample listings, areas, types, amenities,
+providers and prices, then shows how to make your own account the admin.
 
 ### Payments
 
@@ -253,7 +251,8 @@ Set up in Paystack → **Settings → API Keys & Webhooks**:
 account has KES enabled, whether payments can be recorded, and the webhook URL to paste.
 
 **Admin** (`/admin`): approve, edit and disable movers / internet / cleaning companies, see the
-Stays waitlist, and edit business settings. Make an account an admin in the SQL Editor:
+Stays waitlist, and edit business settings. Make an account an admin in the SQL Editor, then
+deploy the web app and enroll its TOTP factor from `/admin`:
 
 ```sql
 update public.profiles set role = 'admin' where id = '<user id>';
@@ -261,24 +260,18 @@ update public.profiles set role = 'admin' where id = '<user id>';
 
 ### Keeping the free Supabase project awake
 
-A free Supabase project pauses after about a week without API activity. Two independent jobs
-query it:
+A free Supabase project pauses after about a week without API activity. GitHub Actions makes an
+hourly read-only keep-alive request, and Supabase `pg_cron` runs listing maintenance hourly.
 
-1. **GitHub Actions**, every hour — [`.github/workflows/supabase-keepalive.yml`](.github/workflows/supabase-keepalive.yml).
-   Add repository secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
-   GitHub switches scheduled workflows off after 60 days without commits; re-enable it from the
-   Actions tab if you get that email.
-2. **Vercel Cron**, daily — [`vercel.json`](vercel.json) calls `/api/cron/daily`.
-
-Both also run `run_daily_maintenance()`, which opens homes whose vacancy date has arrived and
-expires abandoned checkouts. This is a strong safeguard, not a guarantee: Supabase can change
-its free-tier policy.
+Add repository secrets `SUPABASE_URL` and `SUPABASE_ANON_KEY`. GitHub switches scheduled
+workflows off after 60 days without commits; re-enable it from the Actions tab if you get that
+email. Maintenance runs inside Supabase and is not exposed through the public API.
 
 ### Environment variables added
 
 | Variable | What it is |
 | --- | --- |
-| `CRON_SECRET` | Optional. Protects `/api/cron/daily`, the keep-alive job |
+| `CRON_SECRET` | Required for direct requests to `/api/cron/daily`; no Vercel Cron is configured |
 | `PAYMENTS_DEMO_MODE` | `true` only for testing payments without Paystack — unlocks are then granted without charging. Never in production |
 
 ---
