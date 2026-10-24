@@ -7,9 +7,11 @@ import type { InquiryStatus } from "@/lib/supabase/database.types";
 import type { ActionResult } from "@/lib/types";
 
 /**
- * Send a support message about a listing. Guests may write without an account;
- * RLS allows public INSERT but never public SELECT. Only the sender and
- * authorized support staff can read the submitted message.
+ * Messaging Kheja_Link about a listing. Free messages to landlords were
+ * removed (0015): the row is addressed to the admins, and RLS refuses any
+ * other recipient. Guests may still write without an account — RLS allows
+ * INSERT from anon but never SELECT, so only the admins and the sender can
+ * read it back.
  */
 export async function sendInquiryAction(
   _prev: ActionResult | null,
@@ -63,6 +65,7 @@ export async function sendInquiryAction(
     };
   }
 
+  revalidatePath("/admin/messages");
   return {
     ok: true,
     data: undefined,

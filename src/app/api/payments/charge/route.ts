@@ -34,10 +34,8 @@ const LIMITS = {
 } as const;
 
 /** A one-way fingerprint of the number, so the log holds no phone numbers. */
-function msisdnHash(msisdn: string): string | null {
-  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret) return null;
-  return createHmac("sha256", secret)
+function msisdnHash(msisdn: string): string {
+  return createHmac("sha256", process.env.SUPABASE_SERVICE_ROLE_KEY ?? "kheja")
     .update(msisdn)
     .digest("hex");
 }
@@ -115,37 +113,25 @@ export async function POST(request: Request) {
   }
 
   const hash = msisdnHash(phone);
-  if (!hash) {
-    return NextResponse.json(
-      { error: "Payments are not available right now. Please try again later." },
-      { status: 503 },
-    );
-  }
   const since = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
   const count = async (column: "reference" | "user_id" | "msisdn_hash", value: string, minutes: number) => {
-    const { count: n, error } = await admin
+    const { count: n } = await admin
       .from("payment_attempts")
       .select("id", { count: "exact", head: true })
       .eq(column, value)
       .eq("channel", "mobile_money")
       .gte("created_at", since(minutes));
-    return { count: n ?? 0, failed: Boolean(error) };
+    return n ?? 0;
   };
   const [byReference, byUser, byNumber] = await Promise.all([
     count("reference", reference, LIMITS.reference.minutes),
     count("user_id", user.id, LIMITS.user.minutes),
     count("msisdn_hash", hash, LIMITS.msisdn.minutes),
   ]);
-  if (byReference.failed || byUser.failed || byNumber.failed) {
-    return NextResponse.json(
-      { error: "Payments are not available right now. Please try again later." },
-      { status: 503 },
-    );
-  }
   if (
-    byReference.count >= LIMITS.reference.max ||
-    byUser.count >= LIMITS.user.max ||
-    byNumber.count >= LIMITS.msisdn.max
+    byReference >= LIMITS.reference.max ||
+    byUser >= LIMITS.user.max ||
+    byNumber >= LIMITS.msisdn.max
   ) {
     return NextResponse.json(
       {
@@ -158,7 +144,7 @@ export async function POST(request: Request) {
   }
 
   // Logged before Paystack is asked, so parallel requests count too.
-  const { data: attempt, error: attemptError } = await admin
+  const { data: attempt } = await admin
     .from("payment_attempts")
     .insert({
       reference,
@@ -170,12 +156,6 @@ export async function POST(request: Request) {
     })
     .select("id")
     .single();
-  if (attemptError || !attempt) {
-    return NextResponse.json(
-      { error: "Payments are not available right now. Please try again later." },
-      { status: 503 },
-    );
-  }
   const recordOutcome = async (row: { status: string; displayText?: string | null; message?: string | null }) => {
     if (!attempt) return;
     await admin

@@ -455,6 +455,10 @@ export type Database = {
         Args: Record<string, never>;
         Returns: boolean;
       };
+      admin_delete_user: {
+        Args: { p_user_id: string };
+        Returns: boolean;
+      };
       admin_mark_refund_paid: {
         Args: { p_refund_id: string; p_reference?: string | null };
         Returns: boolean;
