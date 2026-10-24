@@ -1,9 +1,9 @@
 # Keeps the free Supabase project from pausing.
 #
 # Supabase pauses a free project after about a week with no API activity. This
-# makes real requests against the project every hour, straight from GitHub, so
-# it keeps working even if the website is down. Vercel Cron (vercel.json) is a
-# second, independent keep-alive once a day.
+# makes a safe read request against the project every hour, straight from
+# GitHub, so it keeps working even if the website is down. Listing maintenance
+# runs inside Supabase pg_cron and is not exposed through the public API.
 #
 # Setup — GitHub → Settings → Secrets and variables → Actions → New secret:
 #   SUPABASE_URL       https://<project-ref>.supabase.co   (the Project URL
@@ -69,11 +69,4 @@ jobs:
             "$URL/rest/v1/property_types?select=id&limit=1" \
             -H "apikey: $KEY" \
             -H "Authorization: Bearer $KEY"
-          echo
-          curl --fail --silent --show-error --retry 3 --retry-delay 10 --max-time 30 \
-            -X POST "$URL/rest/v1/rpc/run_daily_maintenance" \
-            -H "apikey: $KEY" \
-            -H "Authorization: Bearer $KEY" \
-            -H "Content-Type: application/json" \
-            -d '{}'
           echo

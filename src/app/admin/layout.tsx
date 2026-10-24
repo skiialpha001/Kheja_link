@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import AdminSidebar, { type Counts } from "@/components/admin/AdminSidebar";
+import AdminMfaGate from "@/components/admin/AdminMfaGate";
 import { createClient, getCurrentProfile } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -10,11 +11,8 @@ export const dynamic = "force-dynamic";
  * The Kheja_Link team's back office: a grouped sidebar (a scrolling row on
  * phones) with live counts of what needs attention, and the page beside it.
  *
- * The role check here only decides what to show. Every table and function
- * behind these pages is admin-only under Row Level Security.
- *
- * Make someone an admin in Admin → Users, or in the Supabase SQL editor:
- *   update public.profiles set role = 'admin' where id = '<user id>';
+ * Role checks decide what to show. The database also requires an AAL2 session
+ * for admin privileges, so direct RPC and table access use the same guard.
  */
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
@@ -40,8 +38,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     );
   }
 
-  // What needs a person, for the badges in the sidebar.
   const supabase = await createClient();
+  const { data: assurance, error: assuranceError } =
+    await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (assuranceError || assurance.currentLevel !== "aal2") {
+    return (
+      <div className="min-h-screen bg-[#f4f4f5] px-4 py-28 font-sans dark:bg-black sm:px-6">
+        <Navbar profile={profile} />
+        <main className="mx-auto max-w-[88rem] pt-8">
+          <AdminMfaGate />
+        </main>
+      </div>
+    );
+  }
+
+  // What needs a person, for the badges in the sidebar.
   const { data } = await supabase.rpc("admin_overview");
   const o = (data ?? {}) as Record<string, number>;
   const counts: Counts = {
