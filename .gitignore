@@ -41,6 +41,11 @@ next-env.d.ts
 .env*
 !.env.example
 
+# Android release signing material and credentials
+**/key.properties
+*.jks
+*.keystore
+
 # Supabase local state in every nested project
 **/supabase/.temp/
 **/supabase/.branches/

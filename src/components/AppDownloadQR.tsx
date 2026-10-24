@@ -12,7 +12,7 @@ import { Smartphone, ShieldCheck, Download } from "lucide-react";
  */
 
 const APK_URL =
-  "https://github.com/skiialpha001/Kheja_link/releases/latest/download/app-arm64-v8a-release.apk";
+  "https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.2/app-arm64-v8a-release.apk";
 
 const FEATURES = [
   "Search every home, filter by area, rent and amenities",

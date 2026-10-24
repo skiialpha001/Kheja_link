@@ -25,9 +25,9 @@ See [`mobile/README.md`](mobile/README.md) for the Flutter app.
 
 ### Download the Android app
 
-**[Download Kheja_Link for Android](https://github.com/skiialpha001/Kheja_link/releases/download/v1.4.0/app-arm64-v8a-release.apk)** (27 MB) — works on almost every phone from the last several years.
+**[Download Kheja_Link for Android](https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.2/app-arm64-v8a-release.apk)** (27 MB) — works on almost every phone from the last several years.
 
-Older 32-bit devices want [this build](https://github.com/skiialpha001/Kheja_link/releases/download/v1.4.0/app-armeabi-v7a-release.apk) instead, and all builds are listed on the [releases page](https://github.com/skiialpha001/Kheja_link/releases/latest).
+Older 32-bit devices want [this build](https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.2/app-armeabi-v7a-release.apk) instead, and all builds are listed on the [releases page](https://github.com/skiialpha001/Kheja_link/releases/latest).
 
 ---
 

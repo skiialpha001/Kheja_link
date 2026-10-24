@@ -1,5 +1,7 @@
 import java.util.Properties
-import java.io.FileInputStream
+import java.security.KeyStore
+import java.security.PrivateKey
+import org.gradle.api.GradleException
 
 plugins {
     id("com.android.application")
@@ -7,14 +9,32 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// The upload key for Google Play lives outside git (android/key.properties and
-// android/app/upload-keystore.jks). Back both up: without them no update can be
-// uploaded. Missing file = release builds fall back to the debug key, which
-// Play refuses, so a store build without the key fails loudly at upload.
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+val releaseSigningError = "Release signing requires valid mobile/android/key.properties. Refusing to fall back to debug key."
+val releaseTaskRequested = gradle.startParameter.taskNames.any { it.contains("Release", ignoreCase = true) }
+val releaseSigningConfigIsValid = runCatching {
+    if (!keystorePropertiesFile.isFile) return@runCatching false
+
+    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+    val storePath = keystoreProperties.getProperty("storeFile")?.trim().orEmpty()
+    val storePassword = keystoreProperties.getProperty("storePassword")?.trim().orEmpty()
+    val keyAlias = keystoreProperties.getProperty("keyAlias")?.trim().orEmpty()
+    val keyPassword = keystoreProperties.getProperty("keyPassword")?.trim().orEmpty()
+    if (storePath.isEmpty() || storePassword.isEmpty() || keyAlias.isEmpty() || keyPassword.isEmpty()) {
+        return@runCatching false
+    }
+
+    val releaseKeystoreFile = rootProject.file(storePath)
+    if (!releaseKeystoreFile.isFile) return@runCatching false
+
+    val releaseKeystore = KeyStore.getInstance("JKS")
+    releaseKeystoreFile.inputStream().use { releaseKeystore.load(it, storePassword.toCharArray()) }
+    releaseKeystore.isKeyEntry(keyAlias) && releaseKeystore.getKey(keyAlias, keyPassword.toCharArray()) is PrivateKey
+}.getOrDefault(false)
+
+if (releaseTaskRequested && !releaseSigningConfigIsValid) {
+    throw GradleException(releaseSigningError)
 }
 
 android {
@@ -38,22 +58,20 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-            if (keystorePropertiesFile.exists()) {
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
+        if (releaseSigningConfigIsValid) {
+            create("release") {
+                keyAlias = keystoreProperties.getProperty("keyAlias").trim()
+                keyPassword = keystoreProperties.getProperty("keyPassword").trim()
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile").trim())
+                storePassword = keystoreProperties.getProperty("storePassword").trim()
             }
         }
     }
 
     buildTypes {
         release {
-            signingConfig = if (keystorePropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
+            if (releaseSigningConfigIsValid) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
