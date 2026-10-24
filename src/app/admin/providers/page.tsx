@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Truck, Wifi, Sparkles, Phone, Mail, MapPin } from "lucide-react";
+import { Plus, Truck, Wifi, Brush, Phone, Mail, MapPin } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import ProviderRowActions from "@/components/admin/ProviderRowActions";
 import { EmptyState, ErrorState, PageHeader, Panel } from "@/components/admin/AdminUI";
@@ -10,7 +10,7 @@ export const metadata = { title: "Service providers — Admin" };
 const CATEGORY = {
   movers: { label: "Movers", icon: Truck },
   isp: { label: "Internet", icon: Wifi },
-  cleaning: { label: "Cleaning", icon: Sparkles },
+  cleaning: { label: "Cleaning", icon: Brush },
 } as const;
 
 function StatusBadge({ provider }: { provider: PartnerRow }) {

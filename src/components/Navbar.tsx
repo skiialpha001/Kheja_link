@@ -275,21 +275,21 @@ export default function Navbar({ onCategorySelect, profile }: NavbarProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-white dark:bg-black pt-32 px-10 md:hidden overflow-y-auto"
+            className="fixed inset-0 z-40 bg-white dark:bg-black pt-28 px-6 sm:px-8 md:hidden overflow-y-auto"
           >
             <div className="flex flex-col min-h-full">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="mb-12"
+                className="mb-8"
               >
                 <span className="text-zinc-400 dark:text-zinc-500 text-xs font-black uppercase tracking-[0.3em]">
                   Quick Links
                 </span>
               </motion.div>
 
-              <div className="flex flex-col gap-8">
+              <div className="flex flex-col gap-5 sm:gap-6">
                 {navLinks.map((item, index) => (
                   <motion.div
                     key={item.name}
@@ -299,7 +299,7 @@ export default function Navbar({ onCategorySelect, profile }: NavbarProps) {
                   >
                     <button
                       onClick={() => handleLinkClick(item.category, item.href)}
-                      className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-600 transition-colors tracking-tighter block text-left w-full"
+                      className="text-[clamp(1.65rem,7vw,2.75rem)] leading-tight font-bold text-zinc-900 dark:text-white hover:text-blue-600 transition-colors tracking-tight block text-left w-full"
                     >
                       {item.name}
                     </button>
@@ -311,7 +311,7 @@ export default function Navbar({ onCategorySelect, profile }: NavbarProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="mt-auto pb-12 pt-20 space-y-4"
+                className="mt-12 pb-8 pt-8 space-y-3"
               >
                 <div className="h-[1px] bg-zinc-100 dark:bg-zinc-800 w-full mb-10" />
                 {profile ? (
@@ -319,14 +319,14 @@ export default function Navbar({ onCategorySelect, profile }: NavbarProps) {
                     <Link
                       href={isLandlord ? "/dashboard" : "/favorites"}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="w-full h-20 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center"
+                      className="w-full min-h-14 bg-blue-600 text-white rounded-2xl font-bold text-base shadow-md active:scale-[0.99] transition-all flex items-center justify-center"
                     >
                       {isLandlord ? "Go to Dashboard" : "Saved Homes"}
                     </Link>
                     <form action={signOutAction}>
                       <button
                         type="submit"
-                        className="w-full h-16 rounded-[2rem] font-black text-lg text-zinc-500 border border-zinc-200 dark:border-zinc-800 active:scale-95 transition-all"
+                        className="w-full min-h-14 rounded-2xl font-semibold text-base text-zinc-600 dark:text-zinc-300 border border-zinc-200 dark:border-zinc-800 active:scale-[0.99] transition-all"
                       >
                         Sign out
                       </button>
@@ -336,7 +336,7 @@ export default function Navbar({ onCategorySelect, profile }: NavbarProps) {
                   <Link
                     href="/signup"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full h-20 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-600/20 active:scale-95 transition-all flex items-center justify-center"
+                    className="w-full min-h-14 bg-blue-600 text-white rounded-2xl font-bold text-base shadow-md active:scale-[0.99] transition-all flex items-center justify-center"
                   >
                     Get Started
                   </Link>

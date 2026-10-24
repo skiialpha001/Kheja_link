@@ -53,11 +53,11 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
       initial={{ opacity: 0, scale: 0.95 }}
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
-      whileHover={{ y: -12 }}
-      className="group relative bg-white dark:bg-zinc-900 rounded-[3rem] overflow-hidden border border-zinc-100 dark:border-zinc-800 shadow-sm hover:shadow-3xl hover:shadow-blue-500/10 transition-all duration-500"
+      whileHover={{ y: -4 }}
+      className="group relative overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm transition-shadow duration-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
     >
       {/* Image Container */}
-      <div className="relative h-80 w-full overflow-hidden">
+      <div className="relative h-64 w-full overflow-hidden bg-zinc-100 sm:h-72 lg:h-80 dark:bg-zinc-800">
         <Link href={href} aria-label={property.title} className="absolute inset-0 z-10" />
         <Image
           src={cover?.public_url ?? FALLBACK_IMAGE}
@@ -66,26 +66,24 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
           className="object-cover transition-transform duration-1000 group-hover:scale-110"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
-
         {/* Badges */}
-        <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-20">
-          <div className="flex items-center gap-2">
-            <span className="px-4 py-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl text-[10px] font-black text-white uppercase tracking-widest">
+        <div className="absolute left-3 right-3 top-3 z-20 flex items-start justify-between gap-2 sm:left-5 sm:right-5 sm:top-5">
+          <div className="flex min-w-0 flex-wrap items-center gap-1.5">
+            <span className="max-w-full truncate rounded-xl border border-white/20 bg-zinc-950/75 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider text-white sm:text-[10px]">
               {property.property_type?.name ?? "Rental"}
             </span>
             {property.is_premium && (
-              <span className="px-3 py-2 bg-amber-500/90 backdrop-blur-xl rounded-2xl text-[10px] font-black text-white uppercase tracking-widest">
+              <span className="rounded-xl bg-amber-700/90 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider text-white sm:text-[10px]">
                 Premium
               </span>
             )}
             {availability && (
               <span
-                className={`px-3 py-2 backdrop-blur-xl rounded-2xl text-[10px] font-black text-white uppercase tracking-widest ${
+                className={`rounded-xl px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider text-white sm:text-[10px] ${
                   availability.tone === "purple"
-                    ? "bg-purple-600/90"
+                    ? "bg-purple-800/90"
                     : availability.tone === "amber"
-                      ? "bg-orange-600/90"
+                      ? "bg-orange-800/90"
                       : "bg-zinc-700/90"
                 }`}
               >
@@ -98,7 +96,7 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
             disabled={isPending}
             aria-pressed={isLiked}
             aria-label={isLiked ? "Remove from saved homes" : "Save this home"}
-            className="w-12 h-12 flex items-center justify-center bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl shadow-lg group/heart hover:bg-white/20 transition-all disabled:opacity-70"
+            className="group/heart flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-zinc-950/75 transition-colors hover:bg-zinc-950 disabled:opacity-70 sm:h-11 sm:w-11"
           >
             {isPending ? (
               <Loader2 className="w-5 h-5 text-white animate-spin" />
@@ -113,12 +111,12 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
         </div>
 
         {/* Price Tag */}
-        <div className="absolute bottom-6 left-6 z-20 pointer-events-none">
-          <div className="flex flex-col">
-            <span className="text-white/70 text-xs font-bold uppercase tracking-widest mb-1">
+        <div className="pointer-events-none absolute bottom-3 left-3 z-20 max-w-[calc(100%-1.5rem)] rounded-xl bg-zinc-950/80 px-3 py-2 sm:bottom-5 sm:left-5 sm:px-4 sm:py-3">
+          <div className="flex min-w-0 flex-col">
+            <span className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-white/80 sm:text-xs">
               {property.price_period === "year" ? "Annual Rent" : "Monthly Rent"}
             </span>
-            <div className="text-3xl font-black text-white tracking-tighter">
+            <div className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
               {formatRent(property.price_amount, property.price_period, property.price_currency).replace(
                 / \/ (month|year)$/,
                 "",
@@ -128,26 +126,26 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
         </div>
 
         {/* Floating Action */}
-        <div className="absolute bottom-6 right-6 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none">
-          <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-blue-600/30">
+        <div className="pointer-events-none absolute bottom-5 right-5 z-20 hidden translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 sm:block">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-700 text-white shadow-lg">
             <ArrowUpRight className="w-6 h-6" />
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-8 space-y-6">
+      <div className="space-y-5 p-5 sm:p-7">
         <div className="space-y-2">
-          <h3 className="text-2xl font-black text-zinc-900 dark:text-white leading-tight group-hover:text-blue-600 transition-colors duration-300">
+          <h3 className="text-xl font-bold leading-snug text-zinc-900 transition-colors group-hover:text-blue-700 sm:text-2xl dark:text-white">
             <Link href={href}>{property.title}</Link>
           </h3>
-          <div className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-start gap-1.5 text-zinc-500 dark:text-zinc-400">
             <MapPin className="w-4 h-4 text-blue-500 shrink-0" />
             <span className="text-sm font-bold tracking-tight">{formatLocation(property.location)}</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between py-5 border-y border-zinc-100 dark:border-zinc-800">
+        <div className="flex flex-wrap items-center justify-start gap-3 border-y border-zinc-100 py-4 dark:border-zinc-800 sm:justify-between">
           {property.bedrooms > 0 && (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center">

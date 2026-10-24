@@ -34,7 +34,7 @@ export default async function Home() {
     <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
       <Navbar profile={profile} />
 
-      <main className="pb-32">
+      <main className="pb-16 sm:pb-24">
         <Hero locations={locations} />
 
         <HomeListings properties={properties} />
@@ -42,32 +42,29 @@ export default async function Home() {
         <AppDownloadQR />
 
         {/* Call to Action */}
-        <section className="px-6 pt-20">
+        <section className="px-4 pt-12 sm:px-6 sm:pt-16">
           <div className="max-w-7xl mx-auto">
-            <div className="relative rounded-[4rem] overflow-hidden bg-zinc-900 dark:bg-zinc-900 py-24 px-10 text-center shadow-3xl shadow-blue-500/10">
-              <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-600/30 via-transparent to-transparent" />
-              <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-emerald-600/20 via-transparent to-transparent" />
-
-              <div className="relative z-10 max-w-3xl mx-auto space-y-12">
-                <div className="inline-block px-4 py-1.5 bg-blue-500/10 backdrop-blur-md border border-blue-500/20 rounded-full text-blue-400 text-xs font-black uppercase tracking-widest">
+            <div className="overflow-hidden rounded-3xl bg-zinc-900 px-5 py-14 text-center shadow-lg shadow-zinc-900/10 sm:rounded-[2.5rem] sm:px-10 sm:py-20">
+              <div className="mx-auto max-w-3xl space-y-6 sm:space-y-8">
+                <div className="inline-block rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-200">
                   Start Your Journey
                 </div>
-                <h2 className="text-5xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter">
-                  Ready to find <br /> your next home?
+                <h2 className="text-balance text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+                  Ready to find your next home?
                 </h2>
-                <p className="text-zinc-400 text-xl md:text-2xl font-medium tracking-tight">
-                  Join thousands of Meru residents finding their dream spaces on Kheja_Link every month.
+                <p className="mx-auto max-w-2xl text-base font-medium leading-relaxed text-zinc-300 sm:text-lg md:text-xl">
+                  Explore long-term rentals across Meru or share a property with people looking for a place to live.
                 </p>
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <div className="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
                   <Link
                     href="/properties"
-                    className="w-full sm:w-auto px-12 h-20 bg-blue-600 text-white rounded-[2rem] font-black text-xl hover:scale-105 active:scale-95 transition-all duration-300 shadow-2xl shadow-blue-600/20 flex items-center justify-center"
+                    className="flex h-14 w-full items-center justify-center rounded-xl bg-blue-700 px-7 font-semibold text-white transition-colors hover:bg-blue-800 sm:w-auto"
                   >
                     Find a House
                   </Link>
                   <Link
                     href="/dashboard/properties/new"
-                    className="w-full sm:w-auto px-12 h-20 bg-white/5 backdrop-blur-xl text-white rounded-[2rem] font-black text-xl hover:bg-white/10 transition-all duration-300 border border-white/10 flex items-center justify-center"
+                    className="flex h-14 w-full items-center justify-center rounded-xl border border-white/20 bg-transparent px-7 font-semibold text-white transition-colors hover:bg-white/10 sm:w-auto"
                   >
                     List Your Property
                   </Link>
