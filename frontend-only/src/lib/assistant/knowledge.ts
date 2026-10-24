@@ -585,7 +585,7 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
         `galleries, saved homes and the landlord dashboard. Your account and shortlist sync between them.\n\n` +
         `It isn't on the Play Store yet, so you install it from our releases page. An iOS version is ` +
         `built but not yet published.`,
-      href: "https://github.com/skiialpha001/Kheja_link/releases/latest",
+      href: "https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.2/app-arm64-v8a-release.apk",
       hrefLabel: "Download the Android app",
       suggestions: ["Do I need an account?", "How do I save a home?"],
     }),
