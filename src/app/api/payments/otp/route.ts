@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { isValidReference, loadCheckout, paystack, userClient } from "@/lib/payments/paystack";
+import { loadCheckout, paystack, serviceClient, userClient } from "@/lib/payments/paystack";
+import { parsePaymentJson, paymentReferenceSchema } from "@/lib/payments/request";
+import { reservePaymentAttempt, updatePaymentAttempt } from "@/lib/payments/rate-limit";
+import { z } from "zod";
 
 /**
  * Some mobile-money providers ask for a one-time code instead of a prompt on
@@ -9,30 +12,53 @@ import { isValidReference, loadCheckout, paystack, userClient } from "@/lib/paym
 
 export const dynamic = "force-dynamic";
 
+const BodySchema = z.object({
+  reference: paymentReferenceSchema,
+  otp: z.string().trim().regex(/^\d{4,8}$/),
+});
+
 export async function POST(request: Request) {
-  let body: { reference?: string; otp?: string };
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
-
-  const reference = body.reference?.trim();
-  const otp = body.otp?.trim();
-
-  if (!isValidReference(reference)) {
-    return NextResponse.json({ error: "A valid payment reference is required." }, { status: 400 });
-  }
-  if (!otp || !/^\d{4,8}$/.test(otp)) {
-    return NextResponse.json({ error: "Enter the code you were sent.", field: "otp" }, { status: 400 });
-  }
+  const parsed = await parsePaymentJson(request, BodySchema);
+  if (!parsed.ok) return parsed.response;
+  const { reference, otp } = parsed.data;
 
   const db = userClient(request);
   if (!db) return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
 
+  const {
+    data: { user },
+  } = await db.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Your session has expired. Sign in again." }, { status: 401 });
+
   const checkout = await loadCheckout(db, reference);
   if (!checkout) {
     return NextResponse.json({ error: "That payment could not be found." }, { status: 404 });
+  }
+
+  const admin = serviceClient();
+  if (!admin) {
+    return NextResponse.json({ error: "Payments are not available right now. Please try again later." }, { status: 503 });
+  }
+
+  let reservation;
+  try {
+    reservation = await reservePaymentAttempt(admin, {
+      reference,
+      userId: user.id,
+      product: checkout.product,
+      channel: "mobile_money",
+      referenceLimit: { max: 5, minutes: 10 },
+      userLimit: { max: 12, minutes: 30 },
+      message: "M-Pesa OTP submission",
+    });
+  } catch {
+    return NextResponse.json({ error: "Payments are not available right now. Please try again later." }, { status: 500 });
+  }
+  if (!reservation.allowed) {
+    return NextResponse.json(
+      { error: "Too many code submissions. Wait a few minutes before trying again." },
+      { status: 429 },
+    );
   }
 
   const submitted = await paystack<{ status?: string; display_text?: string; message?: string }>(
@@ -41,6 +67,7 @@ export async function POST(request: Request) {
   );
 
   if (!submitted.ok || !submitted.data) {
+    await updatePaymentAttempt(admin, reservation.attemptId, "failed", submitted.message);
     return NextResponse.json(
       { error: submitted.message || "That code was not accepted. Please try again." },
       { status: 400 },
@@ -48,6 +75,13 @@ export async function POST(request: Request) {
   }
 
   const status = submitted.data.status === "success" ? "success" : "pending";
+  await updatePaymentAttempt(
+    admin,
+    reservation.attemptId,
+    status,
+    submitted.data.message,
+    submitted.data.display_text,
+  );
   return NextResponse.json({
     status,
     displayText: submitted.data.display_text ?? null,

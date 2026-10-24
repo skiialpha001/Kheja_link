@@ -1,6 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { readPaymentJsonText, MAX_WEBHOOK_JSON_BYTES } from "@/lib/payments/request";
+import { z } from "zod";
 
 /**
  * Paystack webhook.
@@ -14,10 +16,19 @@ import { createClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
-type PaystackEvent = {
-  event?: string;
-  data?: { reference?: string; status?: string; currency?: string; amount?: number };
-};
+const PaystackEventSchema = z.object({
+  event: z.string().max(128).optional(),
+  data: z
+    .object({
+      reference: z.string().max(128).nullable().optional(),
+      status: z.string().max(64).nullable().optional(),
+      currency: z.string().length(3).nullable().optional(),
+      amount: z.number().finite().nonnegative().nullable().optional(),
+    })
+    .passthrough()
+    .nullable()
+    .optional(),
+}).passthrough();
 
 export async function POST(request: Request) {
   const secret = process.env.PAYSTACK_SECRET_KEY;
@@ -25,13 +36,18 @@ export async function POST(request: Request) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!secret || !supabaseUrl || !serviceKey) {
-    // Never reveal which piece is missing.
-    return NextResponse.json({ received: true }, { status: 200 });
+    // A 5xx asks Paystack to retry after configuration is restored.
+    return NextResponse.json({ error: "Webhook is temporarily unavailable." }, { status: 500 });
   }
 
   // The signature covers the raw bytes, so read the body as text first.
-  const raw = await request.text();
+  const body = await readPaymentJsonText(request, MAX_WEBHOOK_JSON_BYTES);
+  if (!body.ok) return body.response;
+  const raw = body.text;
   const signature = request.headers.get("x-paystack-signature") ?? "";
+  if (!z.string().regex(/^[a-f\d]{128}$/i).safeParse(signature).success) {
+    return NextResponse.json({ error: "Invalid signature." }, { status: 401 });
+  }
 
   const expected = createHmac("sha512", secret).update(raw).digest("hex");
 
@@ -41,12 +57,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature." }, { status: 401 });
   }
 
-  let event: PaystackEvent;
+  let payload: unknown;
   try {
-    event = JSON.parse(raw) as PaystackEvent;
+    payload = JSON.parse(raw);
   } catch {
     return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
   }
+  const parsed = PaystackEventSchema.safeParse(payload);
+  if (!parsed.success) return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
+  const event = parsed.data;
 
   const reference = event.data?.reference;
 

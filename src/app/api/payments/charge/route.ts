@@ -1,7 +1,6 @@
 import { createHmac } from "node:crypto";
 import { NextResponse } from "next/server";
 import {
-  isValidReference,
   kenyanMsisdn,
   loadCheckout,
   localMsisdn,
@@ -9,6 +8,9 @@ import {
   serviceClient,
   userClient,
 } from "@/lib/payments/paystack";
+import { parsePaymentJson, paymentReferenceSchema } from "@/lib/payments/request";
+import { reservePaymentAttempt, updatePaymentAttempt } from "@/lib/payments/rate-limit";
+import { z } from "zod";
 
 /**
  * Starts a payment from Kheja_Link's own screens.
@@ -35,27 +37,26 @@ const LIMITS = {
 
 /** A one-way fingerprint of the number, so the log holds no phone numbers. */
 function msisdnHash(msisdn: string): string {
-  return createHmac("sha256", process.env.SUPABASE_SERVICE_ROLE_KEY ?? "kheja")
+  const secret = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!secret) throw new Error("Payment service is not configured.");
+  return createHmac("sha256", secret)
     .update(msisdn)
     .digest("hex");
 }
 
 export const dynamic = "force-dynamic";
 
-type Body = { reference?: string; phone?: string };
+const BodySchema = z.object({
+  reference: paymentReferenceSchema,
+  phone: z.string().trim().min(1).max(40),
+});
 
 export async function POST(request: Request) {
-  let body: Body;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
+  const parsed = await parsePaymentJson(request, BodySchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.data;
 
-  const reference = body.reference?.trim();
-  if (!isValidReference(reference)) {
-    return NextResponse.json({ error: "A valid payment reference is required." }, { status: 400 });
-  }
+  const reference = body.reference;
 
   const phone = kenyanMsisdn(body.phone);
   if (!phone) {
@@ -112,27 +113,26 @@ export async function POST(request: Request) {
     );
   }
 
-  const hash = msisdnHash(phone);
-  const since = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
-  const count = async (column: "reference" | "user_id" | "msisdn_hash", value: string, minutes: number) => {
-    const { count: n } = await admin
-      .from("payment_attempts")
-      .select("id", { count: "exact", head: true })
-      .eq(column, value)
-      .eq("channel", "mobile_money")
-      .gte("created_at", since(minutes));
-    return n ?? 0;
-  };
-  const [byReference, byUser, byNumber] = await Promise.all([
-    count("reference", reference, LIMITS.reference.minutes),
-    count("user_id", user.id, LIMITS.user.minutes),
-    count("msisdn_hash", hash, LIMITS.msisdn.minutes),
-  ]);
-  if (
-    byReference >= LIMITS.reference.max ||
-    byUser >= LIMITS.user.max ||
-    byNumber >= LIMITS.msisdn.max
-  ) {
+  let reservation;
+  try {
+    reservation = await reservePaymentAttempt(admin, {
+      reference,
+      userId: user.id,
+      product: checkout.product,
+      channel: "mobile_money",
+      referenceLimit: LIMITS.reference,
+      userLimit: LIMITS.user,
+      msisdnHash: msisdnHash(phone),
+      msisdnLimit: LIMITS.msisdn,
+      message: "M-Pesa charge request",
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Payments are not available right now. Please try again later." },
+      { status: 500 },
+    );
+  }
+  if (!reservation.allowed) {
     return NextResponse.json(
       {
         error:
@@ -143,29 +143,12 @@ export async function POST(request: Request) {
     );
   }
 
-  // Logged before Paystack is asked, so parallel requests count too.
-  const { data: attempt } = await admin
-    .from("payment_attempts")
-    .insert({
-      reference,
-      product: checkout.product,
-      channel: "mobile_money",
-      status: "pending",
-      user_id: user.id,
-      msisdn_hash: hash,
-    })
-    .select("id")
-    .single();
-  const recordOutcome = async (row: { status: string; displayText?: string | null; message?: string | null }) => {
-    if (!attempt) return;
-    await admin
-      .from("payment_attempts")
-      .update({ status: row.status, display_text: row.displayText ?? null, message: row.message ?? null })
-      .eq("id", attempt.id)
-      .then(
-        () => undefined,
-        () => undefined, // logging must never break a payment
-      );
+  const recordOutcome = async (row: {
+    status: "pending" | "send_otp" | "success" | "failed";
+    displayText?: string | null;
+    message?: string | null;
+  }) => {
+    await updatePaymentAttempt(admin, reservation.attemptId, row.status, row.message, row.displayText);
   };
 
   type Charge = { status?: string; display_text?: string; message?: string; reference?: string };
