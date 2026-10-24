@@ -17,6 +17,12 @@ phone shows up on the website under the same account.
 
 See [`mobile/README.md`](mobile/README.md) for the Flutter app.
 
+### Project links
+
+- **Live website:** [www.khejalink.name.ng](https://www.khejalink.name.ng/)
+- **GitHub Pages link:** [skiialpha001.github.io/Kheja_link](https://skiialpha001.github.io/Kheja_link/) (forwards to the live website)
+- **Canonical source repository:** [skiialpha001/Kheja_link](https://github.com/skiialpha001/Kheja_link)
+
 ### Download the Android app
 
 **[Download Kheja_Link for Android](https://github.com/skiialpha001/Kheja_link/releases/download/v1.4.0/app-arm64-v8a-release.apk)** (27 MB) — works on almost every phone from the last several years.
@@ -292,4 +298,8 @@ email. Maintenance runs inside Supabase and is not exposed through the public AP
 
 ## Licence
 
-Private project. Developed by **ralph_tech**.
+This is the public source repository for Kheja_Link:
+[skiialpha001/Kheja_link](https://github.com/skiialpha001/Kheja_link). No standalone `LICENSE` file is
+included, so this repository does not declare an open-source license.
+
+Created by **ralph_tech** and **Peter Gikunju** ([gikunjucreates](https://gikunjucreates.work.gd/)).
