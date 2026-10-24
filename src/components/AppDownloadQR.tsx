@@ -30,24 +30,22 @@ export default async function AppDownloadQR() {
   });
 
   return (
-    <section id="get-the-app" className="px-6 pt-20 scroll-mt-32">
+    <section id="get-the-app" className="scroll-mt-24 px-4 pt-12 sm:px-6 sm:pt-16">
       <div className="max-w-7xl mx-auto">
-        <div className="relative rounded-[4rem] overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-10 md:p-16">
-          <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent" />
-
-          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.3fr_auto] gap-12 lg:gap-20 items-center">
-            <div className="space-y-8">
+        <div className="overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900 sm:rounded-[2.5rem] sm:p-8 lg:p-12">
+          <div className="grid grid-cols-1 items-center gap-8 sm:gap-12 lg:grid-cols-[1.3fr_auto] lg:gap-16">
+            <div className="space-y-6 sm:space-y-8">
               <div className="flex items-center gap-2 text-blue-600 font-black uppercase tracking-[0.2em] text-[10px]">
                 <Smartphone className="w-4 h-4" />
                 <span>Kheja_Link for Android</span>
               </div>
 
-              <h2 className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white tracking-tighter leading-[0.95]">
-                Scan. Install. <br />
+              <h2 className="text-3xl font-black leading-tight tracking-tight text-zinc-900 dark:text-white sm:text-4xl md:text-5xl">
+                Scan. Install. <br className="hidden sm:block" />
                 Start hunting.
               </h2>
 
-              <p className="text-lg md:text-xl text-zinc-500 dark:text-zinc-400 font-medium max-w-lg">
+              <p className="max-w-lg text-base font-medium leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-lg">
                 Point your phone camera at the code and the app downloads. Your saved
                 homes and account work across both.
               </p>
@@ -58,38 +56,38 @@ export default async function AppDownloadQR() {
                     <span className="w-5 h-5 rounded-full bg-emerald-500/15 flex items-center justify-center shrink-0 mt-0.5">
                       <ShieldCheck className="w-3 h-3 text-emerald-600" />
                     </span>
-                    <span className="font-bold text-zinc-600 dark:text-zinc-400">
+                    <span className="text-sm font-medium leading-relaxed text-zinc-600 dark:text-zinc-400 sm:text-base">
                       {feature}
                     </span>
                   </li>
                 ))}
               </ul>
 
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 pt-2">
+              <div className="flex flex-col items-stretch gap-4 pt-1 sm:flex-row sm:items-center">
                 <a
                   href={APK_URL}
-                  className="inline-flex items-center justify-center gap-2 px-8 h-16 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+                  className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-blue-700 px-6 font-semibold text-white transition-colors hover:bg-blue-800 sm:w-auto"
                 >
                   <Download className="w-5 h-5" />
                   Download directly
                 </a>
-                <p className="text-xs font-bold text-zinc-400 max-w-[16rem] leading-relaxed">
-                  Not on the Play Store yet, so Android will ask you to allow the
-                  install. That prompt is expected.
+                <p className="max-w-sm text-xs font-medium leading-relaxed text-zinc-500 dark:text-zinc-400">
+                  If you install this APK directly, Android may ask you to allow
+                  installs from your browser.
                 </p>
               </div>
             </div>
 
             {/* The code itself */}
             <div className="justify-self-center lg:justify-self-end">
-              <div className="p-6 bg-white rounded-[2.5rem] border border-zinc-200 shadow-2xl shadow-blue-500/10">
+              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm sm:p-5 dark:border-zinc-700">
                 <Image
                   src={qr}
                   alt="QR code to download the Kheja_Link Android app"
                   width={240}
                   height={240}
                   unoptimized
-                  className="w-[200px] h-[200px] md:w-[240px] md:h-[240px]"
+                  className="h-auto w-[min(200px,60vw)] sm:w-[240px]"
                 />
                 <p className="mt-4 text-center text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                   Scan with your camera

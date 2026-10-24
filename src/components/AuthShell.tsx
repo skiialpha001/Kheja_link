@@ -4,8 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import Logo from "@/components/Logo";
 
 /**
- * Shared frame for the sign-in / sign-up screens: the same gradient-blob
- * treatment as the hero, so auth does not feel like a different product.
+ * Shared frame for sign-in and sign-up screens.
  */
 export default function AuthShell({
   title,
@@ -19,13 +18,8 @@ export default function AuthShell({
   footer: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans flex flex-col items-center justify-center px-6 py-16 relative overflow-hidden selection:bg-blue-100 dark:selection:bg-blue-900/30">
-      <div className="absolute inset-0 -z-10 overflow-hidden" aria-hidden="true">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-400/20 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[55%] h-[55%] bg-emerald-400/20 blur-[150px] rounded-full" />
-      </div>
-
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen bg-zinc-50 dark:bg-black font-sans flex flex-col items-center justify-center px-4 sm:px-6 py-10 sm:py-16 selection:bg-blue-100 dark:selection:bg-blue-900/30">
+      <div className="w-full max-w-md space-y-6 sm:space-y-8">
         <div className="flex items-center justify-between">
           <Logo size={44} />
           <Link
@@ -39,7 +33,7 @@ export default function AuthShell({
 
         {/* The full lockup, where there is room to show it properly. The
             navbar and favicon use the mark alone, which stays legible small. */}
-        <div className="relative w-full aspect-[5/2] rounded-[2rem] overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
+        <div className="relative w-full aspect-[5/2] rounded-3xl overflow-hidden ring-1 ring-black/5 dark:ring-white/10">
           <Image
             src="/khejalink-lockup.jpeg"
             alt="Kheja_Link"
@@ -51,13 +45,13 @@ export default function AuthShell({
         </div>
 
         <div className="space-y-3">
-          <h1 className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tighter leading-[0.95]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tighter leading-[0.98]">
             {title}
           </h1>
           <p className="text-zinc-500 dark:text-zinc-400 font-medium">{subtitle}</p>
         </div>
 
-        <div className="p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] shadow-2xl shadow-blue-500/5">
+        <div className="p-5 sm:p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl sm:rounded-[2rem] shadow-sm">
           {children}
         </div>
 

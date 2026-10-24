@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Sparkles, Bot, User, ArrowUpRight } from "lucide-react";
+import { MessageSquare, X, Send, Bot, User, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { askAssistantAction, type AssistantProperty } from "@/lib/actions/assistant";
@@ -102,9 +102,9 @@ export default function AIChatAssistant() {
         whileTap={{ scale: 0.9 }}
         onClick={() => setIsOpen(true)}
         aria-label="Open the Kheja_Link assistant"
-        className="fixed bottom-6 right-6 w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-2xl flex items-center justify-center z-50 group border-4 border-white dark:border-zinc-900"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-14 h-14 sm:w-16 sm:h-16 bg-blue-600 text-white rounded-2xl shadow-lg flex items-center justify-center z-50 group border-4 border-white dark:border-zinc-900"
       >
-        <MessageSquare className="w-8 h-8 group-hover:rotate-12 transition-transform" />
+        <MessageSquare className="w-7 h-7 sm:w-8 sm:h-8 group-hover:rotate-12 transition-transform" />
         <span className="absolute -top-2 -right-2 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white dark:border-zinc-900 animate-pulse" />
       </motion.button>
 
@@ -117,17 +117,16 @@ export default function AIChatAssistant() {
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             role="dialog"
             aria-label="Kheja_Link assistant"
-            className="fixed bottom-24 right-6 w-[90vw] md:w-[400px] h-[600px] max-h-[calc(100vh-8rem)] bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.2)] dark:shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-zinc-200 dark:border-zinc-800 flex flex-col z-50 overflow-hidden"
+            className="fixed bottom-20 left-3 right-3 sm:left-auto sm:right-6 sm:w-[400px] h-[min(600px,calc(100dvh-6rem))] bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border border-zinc-200 dark:border-zinc-800 flex flex-col z-50 overflow-hidden"
           >
             {/* Header */}
-            <div className="p-6 bg-zinc-900 dark:bg-black text-white flex items-center justify-between relative overflow-hidden shrink-0">
-              <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-500 via-transparent to-transparent" />
-              <div className="relative flex items-center gap-4">
-                <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
-                  <Bot className="w-7 h-7" />
+            <div className="p-4 sm:p-5 bg-zinc-900 dark:bg-black text-white flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                  <Bot className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-black text-lg tracking-tight">Kheja_Link AI</h3>
+                  <h3 className="font-bold text-base tracking-tight">Kheja_Link assistant</h3>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                     <span className="text-[10px] uppercase font-black tracking-widest text-zinc-400">
@@ -148,7 +147,7 @@ export default function AIChatAssistant() {
             {/* Chat Messages */}
             <div
               ref={scrollRef}
-              className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide bg-zinc-50 dark:bg-zinc-900/50"
+              className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5 scrollbar-hide bg-zinc-50 dark:bg-zinc-900/50"
             >
               {messages.map((msg) => (
                 <motion.div
@@ -167,7 +166,7 @@ export default function AIChatAssistant() {
                           : "bg-blue-600 text-white"
                       }`}
                     >
-                      {msg.role === "user" ? <User className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                      {msg.role === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                     </div>
                     <div
                       className={`max-w-[80%] p-4 rounded-3xl text-sm font-medium leading-relaxed shadow-sm ${
@@ -267,7 +266,7 @@ export default function AIChatAssistant() {
               {isTyping && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white">
-                    <Sparkles className="w-4 h-4" />
+                      <Bot className="w-4 h-4" />
                   </div>
                   <div className="bg-white dark:bg-zinc-800 p-4 rounded-3xl rounded-tl-none border border-zinc-200 dark:border-zinc-700">
                     <div className="flex gap-1">
@@ -286,7 +285,7 @@ export default function AIChatAssistant() {
                 event.preventDefault();
                 void send(inputValue);
               }}
-              className="p-6 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 shrink-0"
+              className="p-4 bg-white dark:bg-zinc-900 border-t border-zinc-100 dark:border-zinc-800 shrink-0"
             >
               <div className="relative">
                 <input
@@ -296,13 +295,13 @@ export default function AIChatAssistant() {
                   onChange={(event) => setInputValue(event.target.value)}
                   placeholder="Ask about Meru rentals..."
                   aria-label="Ask the Kheja_Link assistant"
-                  className="w-full h-14 pl-6 pr-14 bg-zinc-100 dark:bg-zinc-800 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 text-zinc-900 dark:text-white font-bold placeholder:text-zinc-500 outline-none"
+                  className="w-full h-12 sm:h-14 pl-4 sm:pl-5 pr-14 bg-zinc-100 dark:bg-zinc-800 border-none rounded-2xl focus:ring-2 focus:ring-blue-600 text-zinc-900 dark:text-white font-medium placeholder:text-zinc-500 outline-none"
                 />
                 <button
                   type="submit"
                   disabled={!inputValue.trim() || isTyping}
                   aria-label="Send"
-                  className="absolute right-2 top-2 w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                  className="absolute right-1.5 top-1.5 w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 active:scale-95 transition-all disabled:opacity-50"
                 >
                   <Send className="w-5 h-5" />
                 </button>

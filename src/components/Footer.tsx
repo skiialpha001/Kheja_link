@@ -31,11 +31,11 @@ const socials = [
 
 export default function Footer() {
   return (
-    <footer className="bg-zinc-950 text-white pt-24 pb-12 px-6 overflow-hidden">
+    <footer className="bg-zinc-950 text-white pt-14 sm:pt-20 pb-8 sm:pb-10 px-5 sm:px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-12 lg:gap-14 mb-12 sm:mb-16">
           {/* Brand */}
-          <div className="space-y-8">
+          <div className="space-y-6">
             <Link href="/" className="flex items-center gap-3 group" aria-label="Kheja_Link home">
               <motion.div
                 whileHover={{ rotate: 12, scale: 1.1 }}
@@ -43,11 +43,11 @@ export default function Footer() {
               >
                 <LogoMark size={56} />
               </motion.div>
-              <span className="text-3xl font-black tracking-tighter">
+              <span className="text-2xl sm:text-3xl font-black tracking-tighter">
                 KHEJA<span className="text-blue-600">_LINK</span>
               </span>
             </Link>
-            <p className="text-zinc-400 text-lg leading-relaxed font-medium">
+            <p className="text-zinc-400 text-base leading-relaxed font-medium">
               Meru&apos;s premier platform for professional house hunting. We simplify finding your next
               rental space with technology and transparency.
             </p>
@@ -71,15 +71,15 @@ export default function Footer() {
 
           {/* Links */}
           <div>
-            <h4 className="font-black mb-8 uppercase tracking-widest text-zinc-500 text-[10px]">
+            <h4 className="font-black mb-5 uppercase tracking-widest text-zinc-500 text-[10px]">
               Quick Links
             </h4>
-            <ul className="space-y-5">
+            <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-zinc-400 hover:text-white transition-colors font-bold text-lg"
+                    className="text-zinc-400 hover:text-white transition-colors font-semibold text-base"
                   >
                     {link.label}
                   </Link>
@@ -90,15 +90,15 @@ export default function Footer() {
 
           {/* Support */}
           <div>
-            <h4 className="font-black mb-8 uppercase tracking-widest text-zinc-500 text-[10px]">
+            <h4 className="font-black mb-5 uppercase tracking-widest text-zinc-500 text-[10px]">
               Support
             </h4>
-            <ul className="space-y-5">
+            <ul className="space-y-3">
               {supportLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-zinc-400 hover:text-white transition-colors font-bold text-lg"
+                    className="text-zinc-400 hover:text-white transition-colors font-semibold text-base"
                   >
                     {link.label}
                   </Link>
@@ -108,11 +108,11 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="space-y-8">
-            <h4 className="font-black mb-8 uppercase tracking-widest text-zinc-500 text-[10px]">
+          <div className="space-y-6">
+            <h4 className="font-black mb-5 uppercase tracking-widest text-zinc-500 text-[10px]">
               Get in Touch
             </h4>
-            <div className="space-y-6">
+            <div className="space-y-4">
               <a
                 href="mailto:ubike418@gmail.com"
                 className="flex items-center gap-4 text-zinc-400 group hover:text-white transition-colors"
@@ -163,7 +163,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="pt-10 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-6 text-zinc-500 text-sm font-medium">
+        <div className="pt-7 sm:pt-8 border-t border-zinc-900 flex flex-col md:flex-row justify-between items-center gap-5 text-zinc-500 text-sm font-medium">
           <div className="space-y-1 text-center md:text-left">
             <p>&copy; {new Date().getFullYear()} KHEJA_LINK. Built for the modern seeker.</p>
             <p className="text-[10px] uppercase tracking-[0.2em] font-black text-zinc-600">
@@ -179,7 +179,7 @@ export default function Footer() {
               </a>
             </p>
           </div>
-          <div className="flex gap-10">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2">
             <Link href="/privacy" className="hover:text-white transition-colors">
               Privacy
             </Link>

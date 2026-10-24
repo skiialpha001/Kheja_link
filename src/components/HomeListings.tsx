@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Sparkles, Filter, Plus } from "lucide-react";
+import { ArrowRight, Home, Filter, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import CircularMenu from "@/components/CircularMenu";
@@ -71,34 +71,34 @@ export default function HomeListings({ properties }: { properties: PropertyListI
   return (
     <>
       {/* Interactive Circular Menu Section */}
-      <section className="relative z-20 -mt-20 md:-mt-32">
+      <section className="relative z-20 -mt-8 sm:-mt-12 lg:-mt-16">
         <div className="max-w-7xl mx-auto">
           <CircularMenu value={activeCategory} onSelect={handleSelect} />
         </div>
       </section>
 
       {/* Dynamic Content Section */}
-      <section id="listings" className="px-6 py-20 scroll-mt-32">
+      <section id="listings" className="scroll-mt-24 px-4 py-14 sm:px-6 sm:py-20">
         <div className="max-w-7xl mx-auto">
           <motion.div
             layout
-            className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16"
+            className="mb-10 flex flex-col gap-6 sm:mb-14 md:flex-row md:items-end md:justify-between"
           >
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 className="flex items-center gap-2 text-blue-600 font-black uppercase tracking-[0.2em] text-[10px]"
               >
-                <Sparkles className="w-4 h-4" />
-                <span>Curated for you</span>
+                <Home className="h-4 w-4" />
+                <span>Find a place to call home</span>
               </motion.div>
-              <h2 className="text-5xl md:text-7xl font-black text-zinc-900 dark:text-white capitalize tracking-tighter">
+              <h2 className="text-4xl font-black capitalize tracking-tighter text-zinc-900 dark:text-white sm:text-5xl lg:text-6xl">
                 {heading}
               </h2>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               <Link
                 href={viewAllHref}
                 className="flex items-center gap-2 px-6 h-14 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl font-bold text-zinc-600 dark:text-zinc-400 hover:border-blue-500 transition-colors"
@@ -125,22 +125,22 @@ export default function HomeListings({ properties }: { properties: PropertyListI
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -40 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12"
+              className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-8"
             >
               {visible.length > 0 ? (
                 visible.map((property) => <PropertyCard key={property.id} property={property} />)
               ) : (
-                <div className="col-span-full py-40 text-center space-y-6">
-                  <div className="w-24 h-24 bg-zinc-100 dark:bg-zinc-900 rounded-[2rem] flex items-center justify-center mx-auto rotate-12">
-                    <Sparkles className="w-12 h-12 text-zinc-300" />
+                <div className="col-span-full space-y-5 py-20 text-center sm:py-32">
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-zinc-100 dark:bg-zinc-900">
+                    <Home className="h-9 w-9 text-zinc-400" />
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-2xl font-black text-zinc-900 dark:text-white">
-                      {properties.length === 0 ? "No homes listed yet" : "Almost there!"}
+                      {properties.length === 0 ? "No published listings available" : "Almost there!"}
                     </h3>
                     <p className="text-zinc-500 font-medium max-w-md mx-auto">
                       {properties.length === 0
-                        ? "Kheja_Link is ready and waiting for its first listings. If you have a house to rent out, you can be the first."
+                        ? "There are no published homes to show right now. Please check back soon."
                         : `We're verifying new ${heading.toLowerCase()} in Meru. Check back shortly!`}
                     </p>
                   </div>

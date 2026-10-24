@@ -13,7 +13,7 @@ import {
   Eye,
   Wallet,
   ArrowLeft,
-  Sparkles,
+  Star,
   Lock,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -124,8 +124,8 @@ export default async function PropertyDetailPage({
     <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
       <Navbar profile={profile} />
 
-      <main className="pt-32 md:pt-40 pb-32 px-6">
-        <div className="max-w-7xl mx-auto space-y-12">
+      <main className="pt-28 sm:pt-32 md:pt-40 pb-20 sm:pb-28 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
           <Link
             href="/properties"
             className="inline-flex items-center gap-2 text-sm font-black text-zinc-500 hover:text-blue-600 transition-colors"
@@ -174,7 +174,7 @@ export default async function PropertyDetailPage({
                   </span>
                 )}
               </div>
-              <h1 className="text-4xl md:text-6xl font-black text-zinc-900 dark:text-white tracking-tighter leading-[0.95]">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-black text-zinc-900 dark:text-white tracking-tight sm:tracking-tighter leading-tight">
                 {property.title}
               </h1>
               <div className="flex items-center gap-1.5 text-zinc-500 dark:text-zinc-400">
@@ -190,7 +190,7 @@ export default async function PropertyDetailPage({
                 <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
                   {property.price_period === "year" ? "Annual Rent" : "Monthly Rent"}
                 </p>
-                <p className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tighter">
+                <p className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tight sm:tracking-tighter">
                   {formatRent(
                     property.price_amount,
                     property.price_period,
@@ -205,9 +205,9 @@ export default async function PropertyDetailPage({
             </div>
           </header>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8 sm:gap-12">
             {/* Left column */}
-            <div className="space-y-12 min-w-0">
+              <div className="space-y-8 sm:space-y-12 min-w-0">
               <PropertyGallery images={property.images} title={property.title} />
 
               {/* Key facts */}
@@ -215,7 +215,7 @@ export default async function PropertyDetailPage({
                 {facts.map((fact) => (
                   <div
                     key={fact.label}
-                    className="p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-2"
+                    className="p-4 sm:p-6 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl sm:rounded-3xl space-y-2"
                   >
                     <fact.icon className="w-5 h-5 text-blue-600" />
                     <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">
@@ -228,7 +228,7 @@ export default async function PropertyDetailPage({
 
               {property.description && (
                 <section className="space-y-4">
-                  <h2 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tighter">
+                  <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white tracking-tight sm:tracking-tighter">
                     About this home
                   </h2>
                   <p className="text-lg leading-relaxed font-medium text-zinc-600 dark:text-zinc-400 whitespace-pre-line">
@@ -239,7 +239,7 @@ export default async function PropertyDetailPage({
 
               {property.amenities.length > 0 && (
                 <section className="space-y-6">
-                  <h2 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tighter">
+                  <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white tracking-tight sm:tracking-tighter">
                     What&apos;s included
                   </h2>
                   <div className="flex flex-wrap gap-3">
@@ -248,7 +248,7 @@ export default async function PropertyDetailPage({
                         key={amenity.id}
                         className="flex items-center gap-2 px-5 h-12 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl font-bold text-sm text-zinc-700 dark:text-zinc-300"
                       >
-                        <Sparkles className="w-4 h-4 text-blue-500" />
+                        <Star className="w-4 h-4 text-blue-600" />
                         {amenity.name}
                       </span>
                     ))}
@@ -257,10 +257,10 @@ export default async function PropertyDetailPage({
               )}
 
               <section className="space-y-4">
-                <h2 className="text-3xl font-black text-zinc-900 dark:text-white tracking-tighter">
+                <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-white tracking-tight sm:tracking-tighter">
                   Location
                 </h2>
-                <div className="p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] space-y-4">
+                <div className="p-5 sm:p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-4">
                   <div className="flex items-start gap-4">
                     <span className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center shrink-0">
                       <MapPin className="w-6 h-6 text-blue-600" />
@@ -294,7 +294,7 @@ export default async function PropertyDetailPage({
 
             {/* Right column — sticky contact rail */}
             <aside id="contact" className="space-y-6 lg:sticky lg:top-32 lg:self-start scroll-mt-32">
-              <div className="p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2.5rem] space-y-6">
+              <div className="p-5 sm:p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-6">
                 <div className="flex items-center gap-4">
                   <span className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl font-black">
                     {property.owner?.full_name?.[0]?.toUpperCase() ?? "K"}
@@ -343,14 +343,14 @@ export default async function PropertyDetailPage({
               </div>
 
               {!isOwner && (
-                <div className="p-8 bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-[2.5rem] space-y-5">
+                <div className="p-5 sm:p-8 bg-blue-700 text-white rounded-3xl space-y-5">
                   <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-blue-100">
                     <Lock className="w-4 h-4" />
                     Unlock contact
                   </div>
                   {/* No price here on purpose: the amount first appears on the payment
                       screen in the app, after the tenant taps "Unlock contact". */}
-                  <p className="text-2xl font-black tracking-tighter">
+                  <p className="text-xl sm:text-2xl font-bold tracking-tight">
                     Get the landlord&apos;s and caretaker&apos;s numbers, the exact address and the
                     map pin.
                   </p>
@@ -360,7 +360,7 @@ export default async function PropertyDetailPage({
                   </p>
                   <Link
                     href="/#get-the-app"
-                    className="w-full h-14 bg-white text-blue-700 rounded-2xl font-black flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform"
+                    className="w-full min-h-14 bg-white text-blue-700 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors"
                   >
                     Unlock in the app
                   </Link>
@@ -401,7 +401,7 @@ export default async function PropertyDetailPage({
 
           {similarWithState.length > 0 && (
             <section className="space-y-8 pt-12">
-              <h2 className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tighter">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-zinc-900 dark:text-white tracking-tight sm:tracking-tighter">
                 You might also like
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
