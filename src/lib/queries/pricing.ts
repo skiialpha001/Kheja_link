@@ -3,10 +3,10 @@ import { createClient } from "@/lib/supabase/server";
 /**
  * What unlocking a listing costs, and what comes back for giving us a house.
  *
- * The numbers live in app_settings (contact_unlock_fee, house_refund_amount).
- * The database prices every payment from the same rows, so what this shows is
- * what the payment provider charges. The values below are only the fallback
- * while the settings cannot be read.
+ * The numbers live in app_settings (contact_unlock_fee, house_refund_amount),
+ * editable in Admin → Business settings. The database prices every payment
+ * from the same rows, so what this shows is what M-Pesa charges. The values
+ * below are only the fallback while the settings cannot be read.
  */
 export type UnlockPricing = {
   unlockFee: number;
