@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import AIChatAssistant from "@/components/AIChatAssistant";
 import PrivacyAwareAnalytics from "@/components/PrivacyAwareAnalytics";
+import ThemeProvider from "@/components/ThemeProvider";
 import { getSiteUrl } from "@/lib/supabase/env";
 import "./globals.css";
 
@@ -56,7 +57,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#fafafa" },
-    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+    { media: "(prefers-color-scheme: dark)", color: "#171717" },
   ],
 };
 
@@ -66,7 +67,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={geist.variable}>
+    <html lang="en" className={geist.variable} suppressHydrationWarning>
       <head>
         {/* Google AdSense: verifies the site and serves ads. Exactly Google's
             snippet — a plain async script in the head of every page. */}
@@ -77,10 +78,12 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        {children}
-        <AIChatAssistant />
-        <Toaster position="bottom-center" richColors closeButton />
-        <PrivacyAwareAnalytics />
+        <ThemeProvider>
+          {children}
+          <AIChatAssistant />
+          <Toaster position="bottom-center" richColors closeButton />
+          <PrivacyAwareAnalytics />
+        </ThemeProvider>
       </body>
     </html>
   );

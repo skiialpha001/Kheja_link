@@ -20,7 +20,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (profile.role !== "admin") {
     return (
-      <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans">
+      <div className="min-h-screen bg-background font-sans">
         <Navbar profile={profile} />
         <main className="pt-32 md:pt-40 pb-32 px-4 sm:px-6">
           <div className="max-w-xl mx-auto text-center space-y-6 py-20">
@@ -43,7 +43,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
   if (assuranceError || assurance.currentLevel !== "aal2") {
     return (
-      <div className="min-h-screen bg-[#f4f4f5] px-4 py-28 font-sans dark:bg-black sm:px-6">
+      <div className="min-h-screen bg-background px-4 py-28 font-sans sm:px-6">
         <Navbar profile={profile} />
         <main className="mx-auto max-w-[88rem] pt-8">
           <AdminMfaGate />
@@ -63,7 +63,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f4f5] dark:bg-black font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
+    <div className="min-h-screen bg-background font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
       <Navbar profile={profile} />
       <main className="pt-28 md:pt-32 pb-24 px-4 sm:px-6">
         <div className="max-w-[88rem] mx-auto flex flex-col lg:flex-row gap-6 lg:gap-10">

@@ -4,7 +4,7 @@ import Logo from "@/components/Logo";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans flex flex-col items-center justify-center px-6 text-center gap-8">
+    <div className="min-h-screen bg-background font-sans flex flex-col items-center justify-center px-6 text-center gap-8">
       <Logo size={56} />
       <div className="w-24 h-24 bg-zinc-100 dark:bg-zinc-900 rounded-[2rem] flex items-center justify-center rotate-12">
         <Compass className="w-12 h-12 text-zinc-300" />

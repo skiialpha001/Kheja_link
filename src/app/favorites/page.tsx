@@ -20,7 +20,7 @@ export default async function FavoritesPage() {
   const [properties, profile] = await Promise.all([getFavoriteProperties(), getCurrentProfile()]);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
+    <div className="min-h-screen bg-background font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
       <Navbar profile={profile} />
 
       <main className="pt-32 md:pt-40 pb-32 px-6">

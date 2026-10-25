@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 import { signOutAction } from "@/lib/actions/auth";
 import type { ProfileRow } from "@/lib/supabase/database.types";
 
@@ -131,6 +132,8 @@ export default function Navbar({ onCategorySelect, profile }: NavbarProps) {
             >
               <Search className="w-5 h-5" />
             </button>
+
+            <ThemeToggle />
 
             <Link
               href="/favorites"
@@ -275,7 +278,7 @@ export default function Navbar({ onCategorySelect, profile }: NavbarProps) {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-white dark:bg-black pt-28 px-6 sm:px-8 md:hidden overflow-y-auto"
+            className="fixed inset-0 z-40 bg-white dark:bg-background pt-28 px-6 sm:px-8 md:hidden overflow-y-auto"
           >
             <div className="flex flex-col min-h-full">
               <motion.div

@@ -84,7 +84,7 @@ export default async function PropertiesPage({ searchParams }: { searchParams: S
   const properties = await withFavoriteState(result.items);
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
+    <div className="min-h-screen bg-background font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
       <Navbar profile={profile} />
 
       <main className="pt-32 md:pt-40 pb-32 px-6">

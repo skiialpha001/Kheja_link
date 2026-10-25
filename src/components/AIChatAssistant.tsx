@@ -120,7 +120,7 @@ export default function AIChatAssistant() {
             className="fixed bottom-20 left-3 right-3 sm:left-auto sm:right-6 sm:w-[400px] h-[min(600px,calc(100dvh-6rem))] bg-white dark:bg-zinc-900 rounded-3xl shadow-xl border border-zinc-200 dark:border-zinc-800 flex flex-col z-50 overflow-hidden"
           >
             {/* Header */}
-            <div className="p-4 sm:p-5 bg-zinc-900 dark:bg-black text-white flex items-center justify-between shrink-0">
+            <div className="p-4 sm:p-5 bg-zinc-900 dark:bg-zinc-900 text-white flex items-center justify-between shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
                   <Bot className="w-6 h-6" />

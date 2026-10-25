@@ -121,7 +121,7 @@ export default async function PropertyDetailPage({
   ].filter(Boolean) as { icon: typeof BedDouble; label: string; value: string }[];
 
   return (
-    <div className="min-h-screen bg-[#fafafa] dark:bg-black font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
+    <div className="min-h-screen bg-background font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
       <Navbar profile={profile} />
 
       <main className="pt-28 sm:pt-32 md:pt-40 pb-20 sm:pb-28 px-4 sm:px-6">

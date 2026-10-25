@@ -29,7 +29,9 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
 
   return (
     <section className="relative flex min-h-[min(90vh,48rem)] flex-col items-center justify-center overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pt-32">
-      <div className="relative z-10 w-full max-w-5xl space-y-8 text-center sm:space-y-10">
+      <div aria-hidden="true" className="home-hero-photo absolute inset-0 bg-cover bg-center" />
+      <div aria-hidden="true" className="home-hero-scrim absolute inset-0" />
+      <div className="relative z-10 w-full max-w-5xl space-y-8 rounded-[2rem] border border-white/60 bg-white/80 p-5 text-center shadow-2xl shadow-black/10 backdrop-blur-md dark:border-white/10 dark:bg-[#171717]/80 sm:space-y-10 sm:rounded-[2.5rem] sm:p-8 md:p-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

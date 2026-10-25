@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 
 /**
  * Shared frame for sign-in and sign-up screens.
@@ -18,17 +19,20 @@ export default function AuthShell({
   footer: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black font-sans flex flex-col items-center justify-center px-4 sm:px-6 py-10 sm:py-16 selection:bg-blue-100 dark:selection:bg-blue-900/30">
+    <div className="min-h-screen bg-background font-sans flex flex-col items-center justify-center px-4 sm:px-6 py-10 sm:py-16 selection:bg-blue-100 dark:selection:bg-blue-900/30">
       <div className="w-full max-w-md space-y-6 sm:space-y-8">
         <div className="flex items-center justify-between">
           <Logo size={44} />
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-blue-600 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Home
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-blue-600 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Home
+            </Link>
+          </div>
         </div>
 
         {/* The full lockup, where there is room to show it properly. The
