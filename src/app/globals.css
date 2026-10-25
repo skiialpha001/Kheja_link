@@ -129,18 +129,26 @@ html:not(.dark) {
 
 .home-hero-photo {
   background-image: url("/home-hero-light.webp");
+  border: 1px solid rgb(255 255 255 / 65%);
+  border-bottom: 0;
+  border-radius: 0 0 2rem 2rem;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
 }
 
 .dark .home-hero-photo {
   background-image: url("/home-hero-dark.webp");
+  border-color: rgb(255 255 255 / 25%);
 }
 
 .home-hero-scrim {
-  background-color: rgb(250 250 250 / 18%);
+  background-color: rgb(250 250 250 / 8%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
 }
 
 .dark .home-hero-scrim {
-  background-color: rgb(12 12 12 / 28%);
+  background-color: rgb(12 12 12 / 16%);
 }
 
 /* ---------------------------------------------------------------------------

@@ -71,7 +71,7 @@ export default function HomeListings({ properties }: { properties: PropertyListI
   return (
     <>
       {/* Interactive Circular Menu Section */}
-      <section className="relative z-20 -mt-8 sm:-mt-12 lg:-mt-16">
+      <section className="relative z-20 mt-0">
         <div className="max-w-7xl mx-auto">
           <CircularMenu value={activeCategory} onSelect={handleSelect} />
         </div>

@@ -31,7 +31,7 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
     <section className="relative flex min-h-[min(90vh,48rem)] flex-col items-center justify-center overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pt-32">
       <div aria-hidden="true" className="home-hero-photo absolute inset-0 bg-cover bg-center" />
       <div aria-hidden="true" className="home-hero-scrim absolute inset-0" />
-      <div className="relative z-10 w-full max-w-5xl space-y-8 rounded-[2rem] border border-white/60 bg-white/80 p-5 text-center shadow-2xl shadow-black/10 backdrop-blur-md dark:border-white/10 dark:bg-[#171717]/80 sm:space-y-10 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+      <div className="relative z-10 w-full max-w-5xl space-y-8 rounded-[2rem] border border-white/80 bg-white/65 p-5 text-center shadow-2xl shadow-black/10 backdrop-blur-sm dark:border-white/15 dark:bg-[#171717]/76 sm:space-y-10 sm:rounded-[2.5rem] sm:p-8 md:p-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -42,7 +42,7 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-4 py-2 text-sm font-semibold text-zinc-600 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300"
+            className="inline-flex items-center gap-2 rounded-full border border-zinc-200/80 bg-white/85 px-4 py-2 text-sm font-semibold text-zinc-600 shadow-sm backdrop-blur-sm dark:border-zinc-700/80 dark:bg-zinc-900/85 dark:text-zinc-300"
           >
             <Home className="h-4 w-4 text-blue-700 dark:text-blue-400" aria-hidden="true" />
             <span>Long-term rentals in Meru</span>
@@ -68,7 +68,7 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
         >
           <form
             onSubmit={handleSubmit}
-            className="relative flex flex-col items-stretch gap-2 rounded-2xl border border-zinc-200 bg-white p-2 shadow-lg shadow-zinc-900/5 dark:border-zinc-800 dark:bg-zinc-900 sm:rounded-3xl md:flex-row md:items-center"
+            className="relative flex flex-col items-stretch gap-2 rounded-2xl border border-zinc-200/90 bg-white/90 p-2 shadow-lg shadow-zinc-900/5 backdrop-blur-sm dark:border-zinc-700/90 dark:bg-zinc-900/90 sm:rounded-3xl md:flex-row md:items-center"
           >
             <div className="flex w-full min-w-0 flex-1 items-center gap-3 px-3 sm:px-4">
               <MapPin className="text-blue-500 w-5 h-5 shrink-0" aria-hidden="true" />
