@@ -52,6 +52,9 @@ export const inquirySchema = z.object({
     .max(2000, "Keep your message under 2000 characters"),
 });
 
+const publicListingContactPattern =
+  /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|(?:\+?254[\s().-]?(?:7|1)(?:[\s().-]*\d){8}|0[71](?:[\s().-]*\d){8})\b/i;
+
 export const propertySchema = z.object({
   title: z.string().trim().min(6, "Give the listing a clear title").max(160),
   description: z
@@ -89,6 +92,20 @@ export const propertySchema = z.object({
   contactWhatsapp: phone.optional().or(z.literal("")),
   amenityIds: z.array(z.string().uuid()).default([]),
   imageUrls: z.array(z.string().url()).max(12, "Up to 12 photos per listing").default([]),
+}).superRefine((listing, context) => {
+  if (listing.status !== "published") return;
+
+  for (const field of ["title", "description", "locationDescription"] as const) {
+    const value = listing[field];
+    if (value && publicListingContactPattern.test(value)) {
+      const path = field === "locationDescription" ? ["locationDescription"] : [field];
+      context.addIssue({
+        code: "custom",
+        path,
+        message: "Public listing text cannot include phone numbers or email addresses. Add contact details only in the private contact fields.",
+      });
+    }
+  }
 });
 
 export type SignUpInput = z.infer<typeof signUpSchema>;

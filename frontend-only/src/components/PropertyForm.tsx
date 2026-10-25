@@ -136,6 +136,9 @@ export default function PropertyForm({
             placeholder="e.g. Quiet estate 5 minutes' walk from Makutano stage, near Kinoru stadium, schools and the market. Tarmac to the gate."
             className={`${inputClass} h-auto py-4 resize-none`}
           />
+          <p className="mt-2 text-sm text-zinc-500">
+            Keep this general: do not include a phone number, email, exact street or building name, or entry instructions. Tenants see this before unlocking.
+          </p>
         </Field>
 
         <Field label="Exact street / estate — only for tenants who unlock" error={err("addressLine")}>
@@ -155,6 +158,9 @@ export default function PropertyForm({
             placeholder="Describe the house, the compound, water and power, and what is nearby."
             className="w-full p-5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl font-medium text-zinc-900 dark:text-white outline-none focus:border-blue-500 transition-colors resize-none"
           />
+          <p className="mt-2 text-sm text-zinc-500">
+            This description is public. Keep contact details, the exact address, and access instructions in the private fields.
+          </p>
         </Field>
       </Section>
 

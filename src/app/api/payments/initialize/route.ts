@@ -18,9 +18,8 @@ import { z } from "zod";
  * app_settings, and the email is the account's own — nothing the app sends
  * changes what is charged. Only Paystack's confirmation marks it paid.
  *
- * Without PAYSTACK_SECRET_KEY, payments fall back to demo mode only when
- * PAYMENTS_DEMO_MODE=true, so a missing key in production never hands out an
- * unlock for free.
+ * Payments fail closed when Paystack is not configured. There is no free
+ * confirmation or demo-payment path.
  */
 
 export const dynamic = "force-dynamic";
@@ -110,29 +109,11 @@ export async function POST(request: Request) {
   }
 
   const secret = process.env.PAYSTACK_SECRET_KEY;
-
   if (!secret) {
-    const admin = serviceClient();
-    if (process.env.PAYMENTS_DEMO_MODE !== "true" || !admin) {
-      return NextResponse.json(
-        { error: "Payments are not available right now. Please try again later." },
-        { status: 503 },
-      );
-    }
-
-    const { data: confirmed, error } = await admin.rpc(
-      checkout.product === "hunting_fee" ? "confirm_hunting_payment" : "confirm_contact_unlock",
-      { p_reference: reference, p_provider: "demo", p_amount_received: checkout.amount },
+    return NextResponse.json(
+      { error: "Payments are not available right now. Please try again later." },
+      { status: 503 },
     );
-    if (error) {
-      return NextResponse.json({ error: "Could not complete the payment." }, { status: 500 });
-    }
-    return NextResponse.json({
-      mode: "demo",
-      paid: confirmed === true,
-      unlocked: confirmed === true,
-      message: "Demo mode — completed without taking a payment.",
-    });
   }
 
   const admin = serviceClient();

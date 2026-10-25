@@ -753,208 +753,10 @@ on conflict (slug) do update
       sort_order = excluded.sort_order;
 
 -- -----------------------------------------------------------------------------
--- Demo landlord + the twelve original design listings.
---
--- The listings need an owner, and owner_id must point at a real auth user.
--- We create a disabled demo landlord account so the listings have an owner.
--- -----------------------------------------------------------------------------
-set search_path = public, extensions;
+-- Demo property rows and the demo landlord are intentionally omitted from this production bootstrap.
+-- The immutable historical migration remains in supabase/migrations for existing project history.
 
-do $$
-declare
-  v_owner uuid;
-  v_type  jsonb;
-  v_loc   jsonb;
-  r       record;
-  v_prop  uuid;
-begin
-  select id into v_owner from auth.users where email = 'demo.landlord@khejalink.co.ke';
 
-  if v_owner is null then
-    v_owner := gen_random_uuid();
-    -- The empty-string token columns are not decorative: GoTrue scans them into
-    -- Go strings and errors on NULL, which would make this account unable to
-    -- sign in.
-    insert into auth.users (
-      id, instance_id, aud, role, email, encrypted_password,
-      email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
-      created_at, updated_at,
-      banned_until,
-      confirmation_token, recovery_token,
-      email_change, email_change_token_new, email_change_token_current
-    ) values (
-      v_owner,
-      '00000000-0000-0000-0000-000000000000',
-      'authenticated',
-      'authenticated',
-      'demo.landlord@khejalink.co.ke',
-      crypt(encode(gen_random_bytes(32), 'hex'), gen_salt('bf')),
-      now(),
-      '{"provider":"email","providers":["email"]}'::jsonb,
-      '{"full_name":"Kheja_Link Demo Landlord","role":"landlord"}'::jsonb,
-      now(), now(),
-      '2099-12-31 23:59:59+00'::timestamptz,
-      '', '', '', '', ''
-    );
-
-    -- GoTrue also expects an identity row for the email provider.
-    insert into auth.identities (
-      id, user_id, provider_id, provider, identity_data,
-      last_sign_in_at, created_at, updated_at
-    ) values (
-      gen_random_uuid(), v_owner, v_owner::text, 'email',
-      jsonb_build_object(
-        'sub', v_owner::text,
-        'email', 'demo.landlord@khejalink.co.ke',
-        'email_verified', true,
-        'phone_verified', false
-      ),
-      now(), now(), now()
-    )
-    on conflict do nothing;
-  else
-    -- Older setup runs created this account with a published demo password.
-    -- Lock it and revoke its refresh sessions while preserving sample listings.
-    update auth.users
-       set encrypted_password = crypt(encode(gen_random_bytes(32), 'hex'), gen_salt('bf')),
-           banned_until = '2099-12-31 23:59:59+00'::timestamptz,
-           updated_at = now()
-     where id = v_owner;
-    delete from auth.sessions where user_id = v_owner;
-  end if;
-
-  -- The on_auth_user_created trigger creates the profile; make sure it exists
-  -- and is a verified landlord either way.
-  insert into public.profiles (id, full_name, phone, role, is_verified, bio)
-  values (
-    v_owner,
-    'Kheja_Link Demo Landlord',
-    '+254710655709',
-    'landlord',
-    true,
-    'Verified demo listings showcasing Kheja_Link across Meru County.'
-  )
-  on conflict (id) do update
-    set full_name    = excluded.full_name,
-        phone        = excluded.phone,
-        role         = 'landlord',
-        is_verified  = true,
-        bio          = excluded.bio;
-
-  -- Lookup maps, so the listing rows below stay readable.
-  select jsonb_object_agg(slug, id) into v_type from public.property_types;
-  select jsonb_object_agg(slug, id) into v_loc  from public.locations;
-
-  for r in
-    select * from (values
-      ('executive-3br-rental-apartment-makutano', 'Executive 3BR Rental Apartment',
-       'apartment', 'makutano', 45000, 3, 2, 1800, false,
-       'A bright, executive three-bedroom apartment in the heart of Makutano. Master ensuite, fitted kitchen, ample parking and round-the-clock security. Walking distance to Greenwood Mall and the Meru–Nanyuki highway.',
-       'Off Meru–Maua Road, Makutano',
-       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=1200'),
-
-      ('spacious-family-rental-home-nkubu', 'Spacious Family Rental Home',
-       'bungalow', 'nkubu', 35000, 3, 2, 2000, false,
-       'A generous three-bedroom bungalow on its own compound in Nkubu. Mature garden, borehole water, detached servant quarters and a quiet residential street ideal for families.',
-       'Nkubu, Imenti South',
-       'https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&q=80&w=1200'),
-
-      ('modern-2br-apartment-unit-meru-town', 'Modern 2BR Apartment Unit',
-       'apartment', 'meru-town', 25000, 2, 1, 1200, false,
-       'Newly finished two-bedroom unit right in Meru Town. Tiled throughout, large windows, reliable county water and prepaid electricity tokens. Minutes from the CBD.',
-       'Meru Town, Central',
-       'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=1200'),
-
-      ('summit-heights-residences-makutano', 'Summit Heights Residences',
-       'apartment', 'makutano', 30000, 2, 2, 1100, false,
-       'Contemporary two-bedroom apartments in a well-managed Makutano block. Lift access, backup generator, CCTV and secure basement parking.',
-       'Summit Heights, Makutano',
-       'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&q=80&w=1200'),
-
-      ('greenfield-rental-units-kinoru', 'Greenfield Rental Units',
-       'apartment', 'kinoru', 28000, 2, 1, 950, false,
-       'Well-kept two-bedroom units in leafy Kinoru. Gated community with a shared courtyard, constant water and a resident caretaker on site.',
-       'Greenfield Court, Kinoru',
-       'https://images.unsplash.com/photo-1536376074432-bf12406b4b74?auto=format&fit=crop&q=80&w=1200'),
-
-      ('spacious-student-room-must', 'Spacious Student Room',
-       'single_room', 'must-area', 8500, 1, 1, 250, false,
-       'Clean, spacious single rooms a short walk from Meru University of Science and Technology. Shared water points, secure gate and a study-friendly compound.',
-       'Nchiru, near MUST main gate',
-       'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&q=80&w=1200'),
-
-      ('comfortable-single-room-milimani', 'Comfortable Single Room',
-       'single_room', 'milimani', 7000, 1, 1, 200, false,
-       'Affordable single room in quiet Milimani. Own metered electricity, shared water and a caretaker on the compound. Well suited to students and young professionals.',
-       'Milimani, Meru Town',
-       'https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&q=80&w=1200'),
-
-      ('modern-bedsitter-unit-makutano', 'Modern Bedsitter Unit',
-       'bedsitter', 'makutano', 15000, 1, 1, 400, false,
-       'Modern self-contained bedsitter with a fitted kitchenette, hot shower and private balcony. Secure block in Makutano with 24-hour lighting.',
-       'Makutano, Meru',
-       'https://images.unsplash.com/photo-1522156373667-4c7234bbd804?auto=format&fit=crop&q=80&w=1200'),
-
-      ('executive-bedsitter-meru-town', 'Executive Bedsitter',
-       'bedsitter', 'meru-town', 12000, 1, 1, 350, false,
-       'Neat executive bedsitter in Meru Town. Tiled floors, built-in wardrobe and a private bathroom, with the CBD on your doorstep.',
-       'Meru Town, Central',
-       'https://images.unsplash.com/photo-1536376074432-bf12406b4b74?auto=format&fit=crop&q=80&w=1200'),
-
-      ('premium-luxury-suite-makutano', 'Premium Luxury Suite',
-       'apartment', 'makutano', 60000, 2, 2, 1400, true,
-       'A premium two-bedroom suite finished to a high standard: quartz worktops, underfloor-heated bathrooms, private balcony with a view over Makutano, lift, generator and dedicated parking.',
-       'Makutano Heights, Makutano',
-       'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&q=80&w=1200'),
-
-      ('prime-retail-shop-space-meru-town', 'Prime Retail Shop Space',
-       'shop', 'meru-town', 35000, 0, 0, 500, false,
-       'High-footfall retail space on Meru Town main street. Roller shutter frontage, three-phase power and a rear store room. Ideal for a boutique, pharmacy or electronics shop.',
-       'Main Street, Meru Town',
-       'https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?auto=format&fit=crop&q=80&w=1200'),
-
-      ('modern-commercial-stall-makutano', 'Modern Commercial Stall',
-       'shop', 'makutano', 12000, 0, 0, 150, false,
-       'Compact commercial stall in a busy Makutano arcade. Steady daily footfall, shared washrooms and secure overnight lock-up.',
-       'Makutano Arcade, Makutano',
-       'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&q=80&w=1200')
-    ) as t(slug, title, type_slug, loc_slug, price, beds, baths, sqft, premium, description, address, image)
-  loop
-    insert into public.properties (
-      owner_id, title, slug, description, property_type_id, location_id, address_line,
-      price_amount, price_currency, price_period, deposit_months,
-      bedrooms, bathrooms, size_sqft, is_premium, status, available_from,
-      contact_phone, contact_whatsapp
-    ) values (
-      v_owner, r.title, r.slug, r.description,
-      (v_type ->> r.type_slug)::uuid,
-      (v_loc  ->> r.loc_slug)::uuid,
-      r.address,
-      r.price, 'KES', 'month', 1,
-      r.beds, r.baths, r.sqft, r.premium, 'published', current_date,
-      '+254710655709', '+254710655709'
-    )
-    on conflict (slug) do update
-      set title       = excluded.title,
-          description = excluded.description,
-          status      = 'published'
-    returning id into v_prop;
-
-    insert into public.property_images (property_id, public_url, alt_text, is_cover, sort_order)
-    select v_prop, r.image, r.title, true, 0
-    where not exists (
-      select 1 from public.property_images pi
-       where pi.property_id = v_prop and pi.is_cover
-    );
-
-    -- A sensible default amenity set so the detail page is not bare.
-    insert into public.property_amenities (property_id, amenity_id)
-    select v_prop, a.id
-      from public.amenities a
-     where a.slug in ('water', 'electricity', 'security', 'parking')
-    on conflict do nothing;
-  end loop;
-end $$;
 
 -- =============================================================================
 -- Kheja_Link — 0004_marketplace.sql
@@ -5826,3 +5628,227 @@ delete from auth.sessions as s
  using auth.users as u
  where s.user_id = u.id
    and lower(u.email) = 'demo.landlord@khejalink.co.ke';
+
+
+-- 20261024140916_split_public_child_table_visibility.sql
+-- Keep public listing media visible without granting anonymous callers access
+-- to the security-definer owner lookup. The owner helper is intentionally
+-- executable only by signed-in users (see 20261017133641_admin_mfa_rpc_lockdown.sql).
+
+-- Images: visitors see media only for published listings; signed-in owners
+-- can also read their own unpublished listing media.
+drop policy if exists property_images_select on public.property_images;
+drop policy if exists property_images_select_public on public.property_images;
+drop policy if exists property_images_select_owner on public.property_images;
+
+create policy property_images_select_public
+  on public.property_images
+  for select to anon
+  using (public.property_is_public(property_id));
+
+create policy property_images_select_owner
+  on public.property_images
+  for select to authenticated
+  using (
+    public.property_is_public(property_id)
+    or public.owns_property(property_id)
+  );
+
+-- Amenities follow the same published-or-owner visibility rule.
+drop policy if exists property_amenities_select on public.property_amenities;
+drop policy if exists property_amenities_select_public on public.property_amenities;
+drop policy if exists property_amenities_select_owner on public.property_amenities;
+
+create policy property_amenities_select_public
+  on public.property_amenities
+  for select to anon
+  using (public.property_is_public(property_id));
+
+create policy property_amenities_select_owner
+  on public.property_amenities
+  for select to authenticated
+  using (
+    public.property_is_public(property_id)
+    or public.owns_property(property_id)
+  );
+
+-- Videos are another public listing child resource, including in mobile API
+-- clients, so keep their role split aligned with images and amenities.
+drop policy if exists property_videos_select on public.property_videos;
+drop policy if exists property_videos_select_public on public.property_videos;
+drop policy if exists property_videos_select_owner on public.property_videos;
+
+create policy property_videos_select_public
+  on public.property_videos
+  for select to anon
+  using (public.property_is_public(property_id));
+
+create policy property_videos_select_owner
+  on public.property_videos
+  for select to authenticated
+  using (
+    public.property_is_public(property_id)
+    or public.owns_property(property_id)
+  );
+
+
+-- 20261024154217_split_app_settings_public_read_and_notification_outbox_grants.sql
+-- Public callers may read only rows explicitly marked public. The admin
+-- predicate is intentionally kept out of the anon policy because anon cannot
+-- execute current_role_is(). Authenticated admins retain access to private
+-- settings; ordinary signed-in users only see public rows.
+alter table public.app_settings enable row level security;
+
+drop policy if exists app_settings_public_read on public.app_settings;
+drop policy if exists app_settings_anon_public_read on public.app_settings;
+drop policy if exists app_settings_authenticated_read on public.app_settings;
+
+create policy app_settings_anon_public_read
+  on public.app_settings
+  for select
+  to anon
+  using (is_public is true);
+
+create policy app_settings_authenticated_read
+  on public.app_settings
+  for select
+  to authenticated
+  using (
+    is_public is true
+    or public.current_role_is(array['admin']::public.user_role[])
+  );
+
+grant select on table public.app_settings to anon, authenticated;
+
+-- This table is internal-only. Keep explicit service_role and postgres access
+-- unchanged for server-side and maintenance operations.
+revoke all privileges on table public.notification_outbox
+  from public, anon, authenticated;
+
+
+-- 20261025090226_atomic_payment_attempt_reservations.sql
+-- Reserve a payment-attempt row in the same transaction as all rate-limit
+-- checks. Advisory locks serialize requests that share a reference, account,
+-- or phone fingerprint, preventing concurrent calls from overshooting limits.
+create or replace function public.reserve_payment_attempt(
+  p_reference text,
+  p_user_id uuid,
+  p_product text,
+  p_channel text,
+  p_reference_max integer,
+  p_reference_minutes integer,
+  p_user_max integer,
+  p_user_minutes integer,
+  p_msisdn_hash text default null,
+  p_msisdn_max integer default null,
+  p_msisdn_minutes integer default null,
+  p_message text default null
+)
+returns table (allowed boolean, attempt_id uuid, limited_scope text)
+language plpgsql
+security definer
+set search_path = pg_catalog, public
+as $function$
+declare
+  v_count bigint;
+  v_attempt_id uuid;
+begin
+  if p_reference is null or p_reference !~* '^k[lh]_[a-z0-9_]{6,80}$'
+     or p_user_id is null
+     or p_product is null or p_product not in ('hunting_fee', 'contact_unlock')
+     or p_channel is null or p_channel not in ('mobile_money', 'card', 'checkout')
+     or p_reference_max is null or p_reference_max < 1
+     or p_reference_minutes is null or p_reference_minutes < 1
+     or p_user_max is null or p_user_max < 1
+     or p_user_minutes is null or p_user_minutes < 1 then
+    raise exception 'Invalid payment attempt reservation parameters.'
+      using errcode = '22023';
+  end if;
+
+  if (p_msisdn_hash is null and (p_msisdn_max is not null or p_msisdn_minutes is not null))
+     or (p_msisdn_hash is not null and
+         (p_msisdn_max is null or p_msisdn_max < 1 or p_msisdn_minutes is null or p_msisdn_minutes < 1)) then
+    raise exception 'Invalid phone rate-limit parameters.'
+      using errcode = '22023';
+  end if;
+
+  -- Every caller acquires locks in this fixed order to avoid deadlocks.
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(
+    'khejalink:payment:reference:' || p_channel || ':' || p_reference, 0
+  ));
+  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(
+    'khejalink:payment:user:' || p_channel || ':' || p_user_id::text, 0
+  ));
+  if p_msisdn_hash is not null then
+    perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(
+      'khejalink:payment:phone:' || p_channel || ':' || p_msisdn_hash, 0
+    ));
+  end if;
+
+  select count(*) into v_count
+    from public.payment_attempts pa
+   where pa.reference = p_reference
+     and pa.channel = p_channel
+     and pa.created_at >= pg_catalog.statement_timestamp() - (p_reference_minutes * interval '1 minute');
+  if v_count >= p_reference_max then
+    return query select false, null::uuid, 'reference'::text;
+    return;
+  end if;
+
+  select count(*) into v_count
+    from public.payment_attempts pa
+   where pa.user_id = p_user_id
+     and pa.channel = p_channel
+     and pa.created_at >= pg_catalog.statement_timestamp() - (p_user_minutes * interval '1 minute');
+  if v_count >= p_user_max then
+    return query select false, null::uuid, 'user'::text;
+    return;
+  end if;
+
+  if p_msisdn_hash is not null then
+    select count(*) into v_count
+      from public.payment_attempts pa
+     where pa.msisdn_hash = p_msisdn_hash
+       and pa.channel = p_channel
+       and pa.created_at >= pg_catalog.statement_timestamp() - (p_msisdn_minutes * interval '1 minute');
+    if v_count >= p_msisdn_max then
+      return query select false, null::uuid, 'msisdn'::text;
+      return;
+    end if;
+  end if;
+
+  insert into public.payment_attempts (
+    reference, product, channel, status, message, user_id, msisdn_hash
+  ) values (
+    p_reference, p_product, p_channel, 'pending', p_message, p_user_id, p_msisdn_hash
+  )
+  returning id into v_attempt_id;
+
+  return query select true, v_attempt_id, null::text;
+end;
+$function$;
+
+alter function public.reserve_payment_attempt(
+  text, uuid, text, text, integer, integer, integer, integer, text, integer, integer, text
+) owner to postgres;
+
+revoke all on function public.reserve_payment_attempt(
+  text, uuid, text, text, integer, integer, integer, integer, text, integer, integer, text
+) from public, anon, authenticated;
+grant execute on function public.reserve_payment_attempt(
+  text, uuid, text, text, integer, integer, integer, integer, text, integer, integer, text
+) to service_role;
+
+
+-- 20261025090233_retire_demo_seed_listings.sql
+-- The historical seed remains in the migration chain for reproducible
+-- development databases. Keep its sample properties out of the live directory
+-- in both fresh installs and existing deployments; preserve the rows so an
+-- administrator can recover or inspect them if necessary.
+update public.properties as p
+   set status = 'archived'::public.property_status,
+       updated_at = pg_catalog.now()
+  from auth.users as u
+ where p.owner_id = u.id
+   and pg_catalog.lower(u.email) = 'demo.landlord@khejalink.co.ke'
+   and p.status <> 'archived'::public.property_status;

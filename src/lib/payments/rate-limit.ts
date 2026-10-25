@@ -20,54 +20,47 @@ export type ReservationResult =
   | { allowed: false; scope: "reference" | "user" | "msisdn" };
 
 /**
- * Checks stored attempt counts and reserves a log row before a provider call.
- * Any database read/write failure throws so callers can fail closed.
+ * Checks stored attempt counts and reserves a log row in one database
+ * transaction. The RPC takes advisory locks for every relevant scope so
+ * concurrent requests cannot all pass the same count check.
  */
 export async function reservePaymentAttempt(
   admin: SupabaseClient,
   input: PaymentAttemptReservation,
 ): Promise<ReservationResult> {
-  const since = (minutes: number) => new Date(Date.now() - minutes * 60_000).toISOString();
-  const count = async (column: "reference" | "user_id" | "msisdn_hash", value: string, limit: WindowLimit) => {
-    const { count: total, error } = await admin
-      .from("payment_attempts")
-      .select("id", { count: "exact", head: true })
-      .eq(column, value)
-      .eq("channel", input.channel)
-      .gte("created_at", since(limit.minutes));
-    if (error || total === null) throw new Error("Unable to check payment attempt limits.");
-    return total;
-  };
+  const { data, error } = await admin.rpc("reserve_payment_attempt", {
+    p_reference: input.reference,
+    p_user_id: input.userId,
+    p_product: input.product,
+    p_channel: input.channel,
+    p_reference_max: input.referenceLimit.max,
+    p_reference_minutes: input.referenceLimit.minutes,
+    p_user_max: input.userLimit.max,
+    p_user_minutes: input.userLimit.minutes,
+    p_msisdn_hash: input.msisdnHash ?? null,
+    p_msisdn_max: input.msisdnLimit?.max ?? null,
+    p_msisdn_minutes: input.msisdnLimit?.minutes ?? null,
+    p_message: input.message ?? null,
+  });
 
-  const checks = await Promise.all([
-    count("reference", input.reference, input.referenceLimit),
-    count("user_id", input.userId, input.userLimit),
-    input.msisdnHash && input.msisdnLimit
-      ? count("msisdn_hash", input.msisdnHash, input.msisdnLimit)
-      : Promise.resolve(null),
-  ]);
+  if (error) throw new Error("Unable to reserve payment attempt.");
 
-  if (checks[0] >= input.referenceLimit.max) return { allowed: false, scope: "reference" };
-  if (checks[1] >= input.userLimit.max) return { allowed: false, scope: "user" };
-  if (checks[2] !== null && input.msisdnLimit && checks[2] >= input.msisdnLimit.max) {
-    return { allowed: false, scope: "msisdn" };
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | { allowed?: unknown; attempt_id?: unknown; limited_scope?: unknown }
+    | null;
+  if (!row || typeof row.allowed !== "boolean") {
+    throw new Error("Payment attempt reservation returned an invalid result.");
   }
-
-  const { data, error } = await admin
-    .from("payment_attempts")
-    .insert({
-      reference: input.reference,
-      product: input.product,
-      channel: input.channel,
-      status: "pending",
-      message: input.message ?? null,
-      user_id: input.userId,
-      msisdn_hash: input.msisdnHash ?? null,
-    })
-    .select("id")
-    .single();
-  if (error || !data?.id) throw new Error("Unable to reserve payment attempt.");
-  return { allowed: true, attemptId: data.id };
+  if (row.allowed) {
+    if (typeof row.attempt_id !== "string") {
+      throw new Error("Payment attempt reservation did not return an audit ID.");
+    }
+    return { allowed: true, attemptId: row.attempt_id };
+  }
+  if (row.limited_scope === "reference" || row.limited_scope === "user" || row.limited_scope === "msisdn") {
+    return { allowed: false, scope: row.limited_scope };
+  }
+  throw new Error("Payment attempt reservation returned an invalid limit scope.");
 }
 
 export async function updatePaymentAttempt(
@@ -78,11 +71,15 @@ export async function updatePaymentAttempt(
   displayText?: string | null,
 ): Promise<void> {
   try {
-    await admin
+    const { error } = await admin
       .from("payment_attempts")
       .update({ status, message: message ?? null, display_text: displayText ?? null })
       .eq("id", attemptId);
+    if (error) {
+      console.error("Payment attempt status update failed.", { attemptId, status, code: error.code });
+    }
   } catch {
     // A failed audit update must not misreport the outcome of a provider call.
+    console.error("Payment attempt status update threw an exception.", { attemptId, status });
   }
 }

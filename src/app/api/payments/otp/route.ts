@@ -34,10 +34,39 @@ export async function POST(request: Request) {
   if (!checkout) {
     return NextResponse.json({ error: "That payment could not be found." }, { status: 404 });
   }
+  if (checkout.status === "paid") {
+    return NextResponse.json({ status: "success", message: "This is already paid for." });
+  }
+  if (checkout.status !== "pending") {
+    return NextResponse.json(
+      { error: "That payment has expired. Please start again." },
+      { status: 409 },
+    );
+  }
 
   const admin = serviceClient();
   if (!admin) {
     return NextResponse.json({ error: "Payments are not available right now. Please try again later." }, { status: 503 });
+  }
+
+  const { data: latestAttempt, error: attemptLookupError } = await admin
+    .from("payment_attempts")
+    .select("status")
+    .eq("reference", reference)
+    .eq("user_id", user.id)
+    .eq("channel", "mobile_money")
+    .eq("message", "M-Pesa charge request")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (attemptLookupError) {
+    return NextResponse.json({ error: "Payments are not available right now. Please try again later." }, { status: 500 });
+  }
+  if (latestAttempt?.status !== "send_otp") {
+    return NextResponse.json(
+      { error: "There is no active code request for this payment. Start the M-Pesa prompt again." },
+      { status: 409 },
+    );
   }
 
   let reservation;

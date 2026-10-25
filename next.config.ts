@@ -79,8 +79,6 @@ const nextConfig: NextConfig = {
             },
           ])
         : []),
-      // Unsplash — used by the seeded demo listings.
-      { protocol: "https", hostname: "images.unsplash.com" },
     ],
   },
 };

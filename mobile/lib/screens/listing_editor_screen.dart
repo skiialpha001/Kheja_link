@@ -386,9 +386,11 @@ class _ListingEditorScreenState extends State<ListingEditorScreen> {
                     hint: 'e.g. Spacious 2 bedroom in Makutano',
                     initial: _draft.title,
                     onSaved: (v) => _draft.title = v,
-                    validator: (v) => v.trim().length < 6
-                        ? 'Give it a clear title of at least 6 characters'
-                        : null,
+                    validator: (v) => _publicListingTextError(
+                      v,
+                      minimumLength: 6,
+                      minimumLengthMessage: 'Give it a clear title of at least 6 characters',
+                    ),
                   ),
                   _dropdown<String>(
                     label: 'Property type',
@@ -409,6 +411,20 @@ class _ListingEditorScreenState extends State<ListingEditorScreen> {
                     initial: _draft.nearby,
                     maxLines: 3,
                     onSaved: (v) => _draft.nearby = v,
+                    validator: _publicListingTextError,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Public information: leave out phone numbers, email, exact street or building names, and entry instructions. Put contact and exact address details in their private fields.',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
                   ),
                   _text(
                     label: 'Exact street or estate — only tenants who unlock',
@@ -444,9 +460,12 @@ class _ListingEditorScreenState extends State<ListingEditorScreen> {
                     initial: _draft.description,
                     maxLines: 6,
                     onSaved: (v) => _draft.description = v,
-                    validator: (v) => v.trim().isNotEmpty && v.trim().length < 30
-                        ? 'Write at least 30 characters so tenants know what to expect'
-                        : null,
+                    validator: (v) => _publicListingTextError(
+                      v,
+                      minimumLength: 30,
+                      minimumLengthMessage: 'Write at least 30 characters so tenants know what to expect',
+                      allowShorterWhenEmpty: true,
+                    ),
                   ),
                 ],
               ),
@@ -990,6 +1009,22 @@ class _ListingEditorScreenState extends State<ListingEditorScreen> {
         ),
       );
 
+  String? _publicListingTextError(
+    String value, {
+    int minimumLength = 0,
+    String? minimumLengthMessage,
+    bool allowShorterWhenEmpty = false,
+  }) {
+    final text = value.trim();
+    if (_publicContactDetailsPattern.hasMatch(text)) {
+      return 'Public listing text cannot include phone numbers or email addresses. Use the private contact fields.';
+    }
+    if (text.length < minimumLength && !(allowShorterWhenEmpty && text.isEmpty)) {
+      return minimumLengthMessage;
+    }
+    return null;
+  }
+
   String? Function(String) _phoneValidator({required bool required}) => (v) {
         final text = v.trim();
         if (text.isEmpty) return required ? 'Tenants need a number to call' : null;
@@ -1135,6 +1170,11 @@ class _ListingEditorScreenState extends State<ListingEditorScreen> {
     );
   }
 }
+
+final RegExp _publicContactDetailsPattern = RegExp(
+  r'\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|(?:\+?254[\s().-]?(?:7|1)(?:[\s().-]*\d){8}|0[71](?:[\s().-]*\d){8})\b',
+  caseSensitive: false,
+);
 
 class _Section extends StatelessWidget {
   const _Section({

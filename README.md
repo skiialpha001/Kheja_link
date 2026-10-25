@@ -61,14 +61,12 @@ Fill in the values from your Supabase project (**Project Settings → API**):
 
 Open the **SQL Editor** in your Supabase dashboard, paste in the contents of
 [`supabase/setup.sql`](supabase/setup.sql), and run it. That single file creates the schema,
-the Row Level Security policies, the storage buckets, and seed data (property types, Meru
-locations, amenities and twelve demo listings).
-
-It is idempotent — running it again is safe.
-
-The seed creates a demo landlord for the sample listings. Its sign-in is disabled
-and it has no published password; keep it disabled in production or remove it
-along with the sample listings.
+the Row Level Security policies, the storage buckets, and reference data (property types, Meru
+locations and amenities). It intentionally omits the old demo landlord and sample listings.
+The immutable historical migration chain retains its original seed for history; the final
+retirement migration archives those sample rows if that older seed has been applied. Treat
+this file as a one-time bootstrap for a new database. Do not rerun it against an existing
+production project; use the reviewed versioned migrations instead.
 
 ### 4. Configure auth redirects
 
@@ -160,7 +158,8 @@ sends no email or SMS — see `0013_in_app_notifications_only.sql`.
 
 > **Run the migration before deploying this code.** Both apps now select the new
 > `availability` column; against an un-migrated database, listings fail to load. Paste the
-> migration into the Supabase SQL Editor (or re-run `setup.sql`, which includes it), then deploy.
+> reviewed versioned migration into Supabase, then deploy. `setup.sql` is only a one-time
+> bootstrap snapshot for a new database; do not rerun it against production.
 
 **Business rules live in the database**, in `app_settings` — edit them at `/admin/settings`
 rather than in code: `contact_unlock_fee` (500), `house_refund_amount` (200),
@@ -216,18 +215,20 @@ from a pre-launch security review:
 The website also sends security headers (CSP, HSTS, no framing, nosniff), card checkout requires
 the signed-in owner of the payment, and the Android app disables backups and cleartext HTTP.
 
-### Going live: reset the data
+### Production data safety
 
-[`supabase/reset_for_production.sql`](supabase/reset_for_production.sql) is **not** a migration.
-Run it once, by hand, after 0016: it deletes every account except the disabled demo landlord
-(and all their activity), keeps the demo landlord's sample listings, areas, types, amenities,
-providers and prices, then shows how to make your own account the admin.
+Do not run `supabase/reset_for_production.sql`. It was a destructive reset script that could
+delete real accounts, listings and payment records, so it has been disabled. Never clear a live
+database to prepare a release. Preserve customer and financial records, and apply only reviewed
+forward migrations with a current backup and a verified target project.
 
 ### Payments
 
 Tenants pay **inside Kheja_Link's own screens**: they choose M-Pesa, type their number, and
 approve the prompt on their phone. Paystack is the processor behind that, used as an API —
 the app never opens a Paystack page for M-Pesa and never holds a key.
+The production payment routes require `PAYSTACK_SECRET_KEY`; if it is missing, they return
+`503` and do not create a free unlock. There is no payment demo mode.
 
 ```
 app  ──▶  /api/payments/charge   ──▶  Paystack  /charge          (start an M-Pesa charge)
@@ -278,7 +279,6 @@ email. Maintenance runs inside Supabase and is not exposed through the public AP
 | Variable | What it is |
 | --- | --- |
 | `CRON_SECRET` | Required for direct requests to `/api/cron/daily`; no Vercel Cron is configured |
-| `PAYMENTS_DEMO_MODE` | `true` only for testing payments without Paystack — unlocks are then granted without charging. Never in production |
 
 ---
 
@@ -287,9 +287,10 @@ email. Maintenance runs inside Supabase and is not exposed through the public AP
 1. Push this repository to GitHub.
 2. In Vercel, **Add New → Project** and import it. The framework preset is detected
    automatically; leave the root directory as the repository root.
-3. Under **Environment Variables**, add all three variables from `.env.example` for the
-   Production, Preview and Development environments. Set `NEXT_PUBLIC_SITE_URL` to your real
-   domain in Production.
+3. Under **Environment Variables**, configure the Supabase public URL/key and site URL for
+   Production and Preview. Add `PAYSTACK_SECRET_KEY` and `SUPABASE_SERVICE_ROLE_KEY` only as
+   server-side secrets in Production; add `CRON_SECRET` only if the daily endpoint is called.
+   Set `NEXT_PUBLIC_SITE_URL` to your canonical domain in Production.
 4. Deploy.
 5. Go back to Supabase → **Authentication → URL Configuration** and add your deployed
    `https://<domain>/auth/callback` to the redirect list.

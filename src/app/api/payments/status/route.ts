@@ -68,7 +68,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const result = await verifyAndConfirm(reference);
+  const result = await verifyAndConfirm(reference, checkout);
   await updatePaymentAttempt(
     admin,
     reservation.attemptId,

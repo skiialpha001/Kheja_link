@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { isValidReference, loadCheckout, serviceClient, userClient } from "@/lib/payments/paystack";
+import { loadCheckout, serviceClient, userClient } from "@/lib/payments/paystack";
+import { parsePaymentJson, paymentReferenceSchema } from "@/lib/payments/request";
+import { reservePaymentAttempt, updatePaymentAttempt } from "@/lib/payments/rate-limit";
+import { z } from "zod";
 
 /**
  * Starts a card payment and returns Paystack's secure card page.
@@ -15,18 +18,22 @@ import { isValidReference, loadCheckout, serviceClient, userClient } from "@/lib
  * app_settings, and the email is the account's own — nothing the app sends
  * changes what is charged. Only Paystack's confirmation marks it paid.
  *
- * Without PAYSTACK_SECRET_KEY, payments fall back to demo mode only when
- * PAYMENTS_DEMO_MODE=true, so a missing key in production never hands out an
- * unlock for free.
+ * Payments fail closed when Paystack is not configured. There is no free
+ * confirmation or demo-payment path.
  */
 
 export const dynamic = "force-dynamic";
 
-type Body = { reference?: string; propertyTitle?: string };
+const BodySchema = z.object({
+  reference: paymentReferenceSchema,
+  propertyTitle: z.string().max(16 * 1024).optional(),
+});
 
 async function paystackCheckout(
   secret: string,
   payload: { email: string; amount: number; currency: string; reference: string; metadata: object },
+  admin: NonNullable<ReturnType<typeof serviceClient>>,
+  attemptId: string,
 ) {
   try {
     const response = await fetch("https://api.paystack.co/transaction/initialize", {
@@ -35,6 +42,7 @@ async function paystackCheckout(
         Authorization: `Bearer ${secret}`,
         "Content-Type": "application/json",
       },
+      signal: AbortSignal.timeout(15_000),
       body: JSON.stringify({
         ...payload,
         // Paystack takes the smallest currency unit.
@@ -50,18 +58,21 @@ async function paystackCheckout(
     };
 
     if (!response.ok || !body.status || !body.data?.authorization_url) {
+      await updatePaymentAttempt(admin, attemptId, "failed", body.message ?? "Paystack initialization failed.");
       return NextResponse.json(
         { error: body.message ?? "Could not start the payment." },
         { status: 502 },
       );
     }
 
+    await updatePaymentAttempt(admin, attemptId, "open_url", "Paystack card checkout initialized.");
     return NextResponse.json({
       mode: "paystack",
       checkoutUrl: body.data.authorization_url,
       reference: payload.reference,
     });
   } catch {
+    await updatePaymentAttempt(admin, attemptId, "failed", "Could not reach Paystack.");
     return NextResponse.json(
       { error: "Could not reach the payment provider. Please try again." },
       { status: 502 },
@@ -70,17 +81,11 @@ async function paystackCheckout(
 }
 
 export async function POST(request: Request) {
-  let body: Body;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
+  const parsed = await parsePaymentJson(request, BodySchema);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.data;
 
-  const reference = body.reference?.trim();
-  if (!isValidReference(reference)) {
-    return NextResponse.json({ error: "A valid reference is required." }, { status: 400 });
-  }
+  const reference = body.reference;
 
   const db = userClient(request);
   if (!db) return NextResponse.json({ error: "Sign in to continue." }, { status: 401 });
@@ -104,29 +109,37 @@ export async function POST(request: Request) {
   }
 
   const secret = process.env.PAYSTACK_SECRET_KEY;
-
   if (!secret) {
-    const admin = serviceClient();
-    if (process.env.PAYMENTS_DEMO_MODE !== "true" || !admin) {
-      return NextResponse.json(
-        { error: "Payments are not available right now. Please try again later." },
-        { status: 503 },
-      );
-    }
-
-    const { data: confirmed, error } = await admin.rpc(
-      checkout.product === "hunting_fee" ? "confirm_hunting_payment" : "confirm_contact_unlock",
-      { p_reference: reference, p_provider: "demo", p_amount_received: checkout.amount },
+    return NextResponse.json(
+      { error: "Payments are not available right now. Please try again later." },
+      { status: 503 },
     );
-    if (error) {
-      return NextResponse.json({ error: "Could not complete the payment." }, { status: 500 });
-    }
-    return NextResponse.json({
-      mode: "demo",
-      paid: confirmed === true,
-      unlocked: confirmed === true,
-      message: "Demo mode — completed without taking a payment.",
+  }
+
+  const admin = serviceClient();
+  if (!admin) {
+    return NextResponse.json({ error: "Payments are not available right now. Please try again later." }, { status: 503 });
+  }
+
+  let reservation;
+  try {
+    reservation = await reservePaymentAttempt(admin, {
+      reference,
+      userId: user.id,
+      product: checkout.product,
+      channel: "card",
+      referenceLimit: { max: 5, minutes: 10 },
+      userLimit: { max: 12, minutes: 30 },
+      message: "Paystack card checkout request",
     });
+  } catch {
+    return NextResponse.json({ error: "Payments are not available right now. Please try again later." }, { status: 500 });
+  }
+  if (!reservation.allowed) {
+    return NextResponse.json(
+      { error: "Too many card checkout requests. Wait a few minutes before trying again." },
+      { status: 429 },
+    );
   }
 
   return paystackCheckout(secret, {
@@ -138,5 +151,5 @@ export async function POST(request: Request) {
       product: checkout.product,
       property: checkout.product === "contact_unlock" ? (body.propertyTitle?.slice(0, 160) ?? null) : null,
     },
-  });
+  }, admin, reservation.attemptId);
 }

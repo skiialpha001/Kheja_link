@@ -31,7 +31,7 @@ const sections: LegalSection[] = [
       "Requests, saved homes and alerts: the homes you save, request or ask to be told about, and the searches you set alerts for.",
       "Payments: which listings you unlocked, the amount, the payment reference and when your 3-hour access ends. M-Pesa and card payments are processed by Paystack; we never see your M-Pesa PIN or card number. To stop anyone flooding a phone with payment prompts, we keep a one-way fingerprint of the number a prompt was sent to, not the number itself.",
       "Houses you give us: the area, rent, landlord's name and phone number you provide, so we can check the house and process your refund.",
-      "Basic usage: a view count per listing and whether you have read your in-app notifications. The app has no analytics or advertising SDKs.",
+      "Basic usage: a view count per listing and whether you have read your in-app notifications. The website uses Vercel Web Analytics for aggregated page-visit statistics, such as pages, referrers and general device or location breakdowns. Vercel says its visitor identifiers are hash-based, expire after 24 hours and do not use third-party cookies. The Android app does not include this website analytics script.",
     ],
   },
   {

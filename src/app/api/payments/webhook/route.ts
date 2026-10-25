@@ -1,7 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { readPaymentJsonText, MAX_WEBHOOK_JSON_BYTES } from "@/lib/payments/request";
+import { MAX_WEBHOOK_JSON_BYTES, paymentReferenceSchema, readPaymentJsonText } from "@/lib/payments/request";
 import { z } from "zod";
 
 /**
@@ -73,11 +73,18 @@ export async function POST(request: Request) {
     event.event !== "charge.success" ||
     event.data?.status !== "success" ||
     !reference ||
-    // Every Kheja_Link price is in shillings; anything else is not our charge.
-    (event.data?.currency !== undefined && event.data.currency !== "KES")
+    !paymentReferenceSchema.safeParse(reference).success
   ) {
     // Acknowledge anything else so Paystack stops retrying.
     return NextResponse.json({ received: true });
+  }
+
+  const amountMinor = event.data?.amount;
+  if (!Number.isSafeInteger(amountMinor) || Number(amountMinor) <= 0 || event.data?.currency !== "KES") {
+    console.warn("Paystack webhook rejected successful charge fields.", {
+      reason: "invalid_amount_or_currency",
+    });
+    return NextResponse.json({ error: "The successful charge is missing a valid KES amount." }, { status: 400 });
   }
 
   const admin = createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } });
@@ -85,23 +92,80 @@ export async function POST(request: Request) {
   // kh_ is the retired house hunting pass, kl_ the per-listing contact unlock.
   // Both are checked against what Paystack actually charged: the database
   // refuses an underpayment, and a retried event is a no-op.
-  const amountReceived = typeof event.data?.amount === "number" ? event.data.amount / 100 : null;
-  const { error } = reference.startsWith("kh_")
+  const huntingPayment = reference.startsWith("kh_");
+  const { data: details, error: detailsError } = huntingPayment
+    ? await admin.rpc("hunting_checkout_details", { p_reference: reference })
+    : await admin.rpc("unlock_checkout_details", { p_reference: reference });
+  if (detailsError) {
+    console.error("Paystack webhook checkout lookup failed.", { code: detailsError.code });
+    return NextResponse.json({ error: "Could not check the payment record." }, { status: 500 });
+  }
+  const checkout = Array.isArray(details) ? details[0] : null;
+  if (!checkout) {
+    console.warn("Paystack webhook has no matching checkout.");
+    return NextResponse.json({ error: "The payment record is not available yet." }, { status: 500 });
+  }
+  if (checkout.status === "paid") return NextResponse.json({ received: true });
+
+  const expectedAmount = Number(checkout.amount);
+  if (!Number.isFinite(expectedAmount) || expectedAmount <= 0) {
+    console.error("Paystack webhook checkout amount is invalid.");
+    return NextResponse.json({ error: "The stored payment amount could not be verified." }, { status: 500 });
+  }
+  if (checkout.currency?.toUpperCase() !== "KES" || Number(amountMinor) / 100 + 0.001 < expectedAmount) {
+    console.warn("Paystack webhook amount or currency does not match checkout.", {
+      reason: checkout.currency?.toUpperCase() !== "KES" ? "currency_mismatch" : "amount_mismatch",
+    });
+    return NextResponse.json({ error: "The successful charge does not match the checkout amount or currency." }, { status: 400 });
+  }
+
+  const { data: confirmed, error } = huntingPayment
     ? await admin.rpc("confirm_hunting_payment", {
         p_reference: reference,
         p_provider: "paystack",
-        p_amount_received: amountReceived,
+        p_amount_received: Number(amountMinor) / 100,
       })
     : await admin.rpc("confirm_contact_unlock", {
         p_reference: reference,
         p_provider: "paystack",
-        p_amount_received: amountReceived,
+        p_amount_received: Number(amountMinor) / 100,
       });
 
   if (error) {
     // A non-2xx makes Paystack retry, which is what we want on a transient fault.
+    console.error("Paystack webhook confirmation RPC failed.", { code: error.code });
     return NextResponse.json({ error: "Could not confirm the payment." }, { status: 500 });
   }
+  if (confirmed === true) return NextResponse.json({ received: true });
 
-  return NextResponse.json({ received: true });
+  // A second delivery can race the first one. A false result is safe to
+  // acknowledge only when the database already records fulfillment.
+  if (huntingPayment) {
+    const { data: current, error: currentError } = await admin
+      .from("hunting_payments")
+      .select("status")
+      .eq("provider_ref", reference)
+      .maybeSingle();
+    if (currentError) {
+      console.error("Paystack webhook fulfillment recheck failed.", { code: currentError.code });
+      return NextResponse.json({ error: "Could not recheck the payment record." }, { status: 500 });
+    }
+    if (current?.status === "paid") return NextResponse.json({ received: true });
+  } else {
+    const { data: current, error: currentError } = await admin
+      .from("contact_unlocks")
+      .select("status, duplicate_payment")
+      .eq("provider_ref", reference)
+      .maybeSingle();
+    if (currentError) {
+      console.error("Paystack webhook fulfillment recheck failed.", { code: currentError.code });
+      return NextResponse.json({ error: "Could not recheck the payment record." }, { status: 500 });
+    }
+    if (current?.status === "paid" || current?.duplicate_payment === true) {
+      return NextResponse.json({ received: true });
+    }
+  }
+
+  console.error("Paystack webhook confirmation returned false without recorded fulfillment.");
+  return NextResponse.json({ error: "The payment confirmation was not recorded." }, { status: 500 });
 }

@@ -168,7 +168,10 @@ export type VerifiedTransaction = {
  * Asks Paystack what really happened, then — and only then — marks our row
  * paid. Safe to call repeatedly: confirming twice does nothing the second time.
  */
-export async function verifyAndConfirm(reference: string): Promise<{
+export async function verifyAndConfirm(
+  reference: string,
+  checkout: Pick<Checkout, "amount" | "currency">,
+): Promise<{
   status: "success" | "pending" | "failed" | "unknown";
   message: string;
   displayText?: string | null;
@@ -190,7 +193,19 @@ export async function verifyAndConfirm(reference: string): Promise<{
   }
 
   const tx = verified.data;
-  const paid = Number(tx.amount ?? 0) / 100;
+  const expectedCurrency = checkout.currency.trim().toUpperCase();
+  const paidCurrency = tx.currency?.trim().toUpperCase();
+  const paidMinor = Number(tx.amount);
+  if (!paidCurrency || paidCurrency !== expectedCurrency) {
+    return { status: "failed", message: "The payment currency did not match this checkout." };
+  }
+  if (!Number.isSafeInteger(paidMinor) || paidMinor <= 0) {
+    return { status: "failed", message: "The payment amount could not be verified." };
+  }
+  const paid = paidMinor / 100;
+  if (paid + 0.001 < checkout.amount) {
+    return { status: "failed", message: "The amount paid was less than the price." };
+  }
 
   if (tx.status === "success") {
     const admin = serviceClient();
@@ -204,26 +219,19 @@ export async function verifyAndConfirm(reference: string): Promise<{
     }
 
     if (product === "hunting_fee") {
-      const { error } = await admin.rpc("confirm_hunting_payment", {
+      const { data: confirmed, error } = await admin.rpc("confirm_hunting_payment", {
         p_reference: reference,
         p_provider: "paystack",
         p_amount_received: paid,
       });
-      if (error) return { status: "pending", message: "Confirming your payment…" };
+      if (error || confirmed !== true) return { status: "pending", message: "Confirming your payment…" };
     } else {
-      const { data: details } = await admin.rpc("unlock_checkout_details", {
-        p_reference: reference,
-      });
-      const expected = Array.isArray(details) ? Number(details[0]?.amount ?? 0) : 0;
-      if (expected > 0 && paid + 0.001 < expected) {
-        return { status: "failed", message: "The amount paid was less than the price." };
-      }
-      const { error } = await admin.rpc("confirm_contact_unlock", {
+      const { data: confirmed, error } = await admin.rpc("confirm_contact_unlock", {
         p_reference: reference,
         p_provider: "paystack",
         p_amount_received: paid,
       });
-      if (error) return { status: "pending", message: "Confirming your payment…" };
+      if (error || confirmed !== true) return { status: "pending", message: "Confirming your payment…" };
     }
 
     return { status: "success", message: "Payment received." };

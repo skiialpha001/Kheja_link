@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "@/components/ui/sonner";
 import AIChatAssistant from "@/components/AIChatAssistant";
+import PrivacyAwareAnalytics from "@/components/PrivacyAwareAnalytics";
 import { getSiteUrl } from "@/lib/supabase/env";
 import "./globals.css";
 
@@ -80,7 +80,7 @@ export default function RootLayout({
         {children}
         <AIChatAssistant />
         <Toaster position="bottom-center" richColors closeButton />
-        <Analytics />
+        <PrivacyAwareAnalytics />
       </body>
     </html>
   );
