@@ -43,7 +43,14 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
+@property --category-accent {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2563eb;
+}
+
 :root {
+  --category-accent: #2563eb;
   --radius: 0.625rem;
   --background: #fafafa;
   --foreground: #18181b;
@@ -76,6 +83,24 @@
   --sidebar-accent-foreground: #18181b;
   --sidebar-border: #e4e4e7;
   --sidebar-ring: #a1a1aa;
+}
+
+.home-page .home-category-header {
+  transition:
+    background-color 650ms ease,
+    border-color 650ms ease,
+    box-shadow 650ms ease;
+}
+
+.home-page .home-category-header.is-scrolled {
+  background-color: color-mix(in srgb, var(--category-accent) 9%, rgb(255 255 255 / 94%));
+  border-color: color-mix(in srgb, var(--category-accent) 20%, white);
+  box-shadow: 0 16px 42px color-mix(in srgb, var(--category-accent) 20%, transparent);
+}
+
+.dark .home-page .home-category-header.is-scrolled {
+  border-color: color-mix(in srgb, var(--category-accent) 28%, #27272a);
+  background-color: color-mix(in srgb, var(--category-accent) 14%, rgb(24 24 27 / 95%));
 }
 
 .dark {
@@ -129,16 +154,12 @@ html:not(.dark) {
 
 .home-hero-photo {
   background-image: url("/home-hero-light.webp");
-  border: 1px solid rgb(255 255 255 / 65%);
-  border-bottom: 0;
-  border-radius: 0 0 2rem 2rem;
   -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
   mask-image: linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%);
 }
 
 .dark .home-hero-photo {
   background-image: url("/home-hero-dark.webp");
-  border-color: rgb(255 255 255 / 25%);
 }
 
 .home-hero-scrim {

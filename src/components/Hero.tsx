@@ -28,7 +28,7 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
   };
 
   return (
-    <section className="relative flex min-h-[min(90vh,48rem)] flex-col items-center justify-center overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pt-32">
+    <section className="relative flex min-h-[min(72vh,44rem)] flex-col items-center justify-center overflow-hidden px-4 pb-8 pt-24 sm:px-6 sm:pt-28">
       <div aria-hidden="true" className="home-hero-photo absolute inset-0 bg-cover bg-center" />
       <div aria-hidden="true" className="home-hero-scrim absolute inset-0" />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1]">
@@ -40,7 +40,7 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
           }}
         />
       </div>
-      <div className="relative z-10 w-full max-w-5xl space-y-8 rounded-[2rem] border border-white/80 bg-white/65 p-5 text-center shadow-2xl shadow-black/10 backdrop-blur-sm dark:border-white/15 dark:bg-[#171717]/76 sm:space-y-10 sm:rounded-[2.5rem] sm:p-8 md:p-10">
+      <div className="relative z-10 w-full max-w-5xl space-y-8 rounded-[2rem] border border-white/35 bg-white/52 p-5 text-center shadow-2xl shadow-black/10 backdrop-blur-sm dark:border-white/10 dark:bg-[#171717]/68 sm:space-y-10 sm:rounded-[2.5rem] sm:p-8 md:p-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -58,14 +58,14 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
           </motion.div>
           <h1 className="text-balance text-5xl font-black leading-[0.98] tracking-tighter text-zinc-900 dark:text-white sm:text-6xl md:text-8xl">
             Find your <br className="hidden sm:block" />
-            <span className="relative inline-block bg-gradient-to-r from-blue-700 via-emerald-600 to-purple-700 bg-clip-text text-transparent dark:from-blue-400 dark:via-emerald-300 dark:to-purple-400">
+            <span className="relative inline-block text-blue-700 dark:text-blue-400">
               next home.
               <motion.span
                 aria-hidden="true"
                 initial={{ width: 0 }}
                 animate={{ width: "100%" }}
                 transition={{ delay: 0.7, duration: 0.8 }}
-                className="absolute -bottom-1 left-0 h-1 rounded-full bg-gradient-to-r from-blue-600 via-emerald-500 to-transparent opacity-40 sm:-bottom-2 sm:h-1.5"
+                className="absolute -bottom-1 left-0 h-1 rounded-full bg-blue-600 opacity-40 dark:bg-blue-400 sm:-bottom-2 sm:h-1.5"
               />
             </span>
           </h1>

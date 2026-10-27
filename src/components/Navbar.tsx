@@ -102,9 +102,9 @@ export default function Navbar({ onCategorySelect, profile }: NavbarProps) {
         }`}
       >
         <div
-          className={`max-w-7xl mx-auto flex items-center justify-between transition-all duration-500 ${
+          className={`home-category-header max-w-7xl mx-auto flex items-center justify-between transition-all duration-500 ${
             isScrolled
-              ? "bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-2xl rounded-[2rem] px-6 py-3"
+              ? "is-scrolled bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 shadow-2xl rounded-[2rem] px-6 py-3"
               : ""
           }`}
         >
