@@ -8,18 +8,18 @@ import {
   Building2,
   User,
   LayoutGrid,
-  Star,
+  Sparkles,
   ShoppingBag,
 } from "lucide-react";
 
 const menuItems = [
-  { id: "hunt", label: "Hunt a House", icon: Home },
-  { id: "list", label: "List a House", icon: PlusCircle },
-  { id: "apartments", label: "Apartments", icon: Building2 },
-  { id: "shops", label: "Shops", icon: ShoppingBag },
-  { id: "rooms", label: "Single Rooms", icon: User },
-  { id: "bedsitters", label: "Bedsitters", icon: LayoutGrid },
-  { id: "premium", label: "Premium Units", icon: Star },
+  { id: "hunt", label: "Hunt a House", icon: Home, activeColor: "#2563eb" },
+  { id: "list", label: "List a House", icon: PlusCircle, activeColor: "#047857" },
+  { id: "apartments", label: "Apartments", icon: Building2, activeColor: "#7e22ce" },
+  { id: "shops", label: "Shops", icon: ShoppingBag, activeColor: "#0e7490" },
+  { id: "rooms", label: "Single Rooms", icon: User, activeColor: "#c2410c" },
+  { id: "bedsitters", label: "Bedsitters", icon: LayoutGrid, activeColor: "#be185d" },
+  { id: "premium", label: "Premium Units", icon: Sparkles, activeColor: "#b45309" },
 ];
 
 export default function CircularMenu({
@@ -57,11 +57,25 @@ export default function CircularMenu({
               whileTap={{ scale: 0.98 }}
               className={`flex min-h-20 w-full max-w-40 flex-col items-center justify-center gap-1.5 rounded-2xl border px-2 py-2 text-center transition-colors sm:min-h-24 ${
                 isSelected
-                  ? "border-blue-700 bg-blue-700 text-white shadow-md shadow-blue-900/10"
+                  ? "border-transparent text-white shadow-md"
                   : "border-zinc-200 bg-white text-zinc-700 hover:border-blue-300 hover:bg-blue-50/60 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-blue-800 dark:hover:bg-zinc-900"
               } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2`}
+              style={
+                isSelected
+                  ? {
+                      backgroundColor: item.activeColor,
+                      boxShadow: `0 8px 18px ${item.activeColor}30`,
+                    }
+                  : undefined
+              }
             >
-              <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
+              <motion.span
+                animate={{ scale: isSelected ? 1.1 : 1 }}
+                transition={{ type: "spring", stiffness: 320, damping: 22 }}
+                className="flex h-6 w-6 items-center justify-center"
+              >
+                <Icon className="h-6 w-6 shrink-0" aria-hidden="true" />
+              </motion.span>
               <span className="w-full text-[10px] font-semibold leading-tight sm:text-[11px]">
                 {item.label}
               </span>
