@@ -4,7 +4,6 @@ import { Toaster } from "@/components/ui/sonner";
 import AIChatAssistant from "@/components/AIChatAssistant";
 import PrivacyAwareAnalytics from "@/components/PrivacyAwareAnalytics";
 import ThemeProvider from "@/components/ThemeProvider";
-import InteractionLoadingIndicator from "@/components/InteractionLoadingIndicator";
 import { getSiteUrl } from "@/lib/supabase/env";
 import "./globals.css";
 
@@ -82,7 +81,6 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <AIChatAssistant />
-          <InteractionLoadingIndicator />
           <Toaster position="bottom-center" richColors closeButton />
           <PrivacyAwareAnalytics />
         </ThemeProvider>
