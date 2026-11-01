@@ -4,6 +4,7 @@ import HomeListings from "@/components/HomeListings";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AppDownloadQR from "@/components/AppDownloadQR";
+import RentalAreaLinks from "@/components/RentalAreaLinks";
 import { getProperties } from "@/lib/queries/properties";
 import { withFavoriteState } from "@/lib/queries/favorites";
 import { getLocations } from "@/lib/queries/lookups";
@@ -38,6 +39,8 @@ export default async function Home() {
         <Hero locations={locations} />
 
         <HomeListings properties={properties} />
+
+        <RentalAreaLinks locations={locations} />
 
         <AppDownloadQR />
 

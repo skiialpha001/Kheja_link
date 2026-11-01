@@ -9,6 +9,7 @@ import { SOCIAL } from "@/lib/social";
 
 const quickLinks = [
   { label: "Search Rentals", href: "/properties" },
+  { label: "Rentals by Area", href: "/areas" },
   { label: "List Your House", href: "/dashboard/properties/new" },
   { label: "Apartments", href: "/properties?type=apartment" },
   { label: "Bedsitters", href: "/properties?type=bedsitter" },

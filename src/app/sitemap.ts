@@ -19,14 +19,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = await createClient();
     const { data } = await supabase
       .from("properties")
-      .select("slug, updated_at")
+      .select("slug, updated_at, location:locations ( slug )")
       .eq("status", "published")
       .order("published_at", { ascending: false })
       .limit(1000);
 
+    const publicListings = (data ?? []) as unknown as {
+      slug: string;
+      updated_at: string | null;
+      location: { slug: string } | null;
+    }[];
+    const areaSlugs = new Set(
+      publicListings
+        .map((property) => property.location?.slug)
+        .filter((slug): slug is string => Boolean(slug)),
+    );
+
     return [
       ...staticRoutes,
-      ...(data ?? []).map((property) => ({
+      { url: `${siteUrl}/areas`, changeFrequency: "weekly", priority: 0.7 },
+      ...[...areaSlugs].map((slug) => ({
+        url: `${siteUrl}/areas/${slug}`,
+        changeFrequency: "daily" as const,
+        priority: 0.75,
+      })),
+      ...publicListings.map((property) => ({
         url: `${siteUrl}/properties/${property.slug}`,
         lastModified: property.updated_at ? new Date(property.updated_at) : undefined,
         changeFrequency: "weekly" as const,
