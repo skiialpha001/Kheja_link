@@ -5,8 +5,10 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DashboardNav from "@/components/DashboardNav";
 import { getCurrentProfile } from "@/lib/supabase/server";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();

@@ -5,6 +5,8 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { getLocations } from "@/lib/queries/lookups";
 import { getCurrentProfile } from "@/lib/supabase/server";
+import { getMeruAreaPathForLocation } from "@/lib/seo/meru-rental-areas";
+import { canonicalAlternates } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +14,7 @@ export const metadata: Metadata = {
   title: "Rental Areas in Meru County",
   description:
     "Browse Kheja_Link's Meru rental areas. Find current long-term houses, apartments, bedsitters, student rooms and shops by location.",
-  alternates: { canonical: "/areas" },
+  alternates: canonicalAlternates("/areas"),
 };
 
 export default async function RentalAreasPage() {
@@ -46,7 +48,7 @@ export default async function RentalAreasPage() {
               {sortedLocations.map((location) => (
                 <li key={location.id}>
                   <Link
-                    href={`/areas/${location.slug}`}
+                    href={getMeruAreaPathForLocation(location.slug) ?? `/areas/${location.slug}`}
                     className="group flex h-full min-h-36 flex-col justify-between rounded-2xl border border-zinc-200 bg-white p-6 transition-colors hover:border-blue-500 dark:border-zinc-800 dark:bg-zinc-900"
                   >
                     <span>

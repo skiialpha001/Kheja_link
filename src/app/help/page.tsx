@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { getCurrentProfile } from "@/lib/supabase/server";
 import { SOCIAL } from "@/lib/social";
 import { TikTokIcon, WhatsAppIcon } from "@/components/SocialIcons";
+import { canonicalAlternates } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
   title: "Help Centre",
   description:
     "How Kheja_Link works, how to stay safe when house hunting in Meru, and how to reach us.",
+  alternates: canonicalAlternates("/help"),
+  openGraph: { locale: "en_KE", url: "/help" },
 };
 
 /**

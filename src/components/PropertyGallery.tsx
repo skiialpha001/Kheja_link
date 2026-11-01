@@ -18,9 +18,11 @@ type GalleryImage = {
 export default function PropertyGallery({
   images,
   title,
+  propertyType,
 }: {
   images: GalleryImage[];
   title: string;
+  propertyType?: string;
 }) {
   const [index, setIndex] = useState(0);
 
@@ -52,9 +54,12 @@ export default function PropertyGallery({
           >
             <Image
               src={active.public_url}
-              alt={active.alt_text ?? title}
+              alt={`${title} - ${propertyType ?? "rental property"} for rent in Meru, Kenya${active.alt_text?.trim() ? `: ${active.alt_text.trim()}` : ""}`}
               fill
-              priority
+              priority={index === 0}
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchPriority={index === 0 ? "high" : undefined}
+              decoding="async"
               sizes="(max-width: 1024px) 100vw, 60vw"
               className="object-cover"
             />
@@ -103,6 +108,8 @@ export default function PropertyGallery({
                 alt=""
                 fill
                 sizes="112px"
+                loading="lazy"
+                decoding="async"
                 className="object-cover"
               />
             </button>

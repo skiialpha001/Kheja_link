@@ -21,10 +21,14 @@ import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyGallery from "@/components/PropertyGallery";
 import InquiryForm from "@/components/InquiryForm";
+import StructuredData from "@/components/StructuredData";
 import FavoriteButton from "@/components/FavoriteButton";
 import { getPropertyBySlug, getSimilarProperties, recordPropertyView } from "@/lib/queries/properties";
 import { getFavoriteIds, withFavoriteState } from "@/lib/queries/favorites";
 import { getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
+import { getMeruAreaPathForLocation } from "@/lib/seo/meru-rental-areas";
+import { getSiteUrl } from "@/lib/supabase/env";
+import { canonicalAlternates } from "@/lib/seo/metadata";
 import {
   availabilityLabel,
   formatLocation,
@@ -45,17 +49,37 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   if (!property) return { title: "Home not found" };
 
-  const where = formatLocation(property.location);
+  const where = property.location?.name ?? "Meru";
   const rent = formatRent(property.price_amount, property.price_period, property.price_currency);
+  const type = property.property_type?.name ?? "Rental";
+  const deposit = `${property.deposit_months} ${property.deposit_months === 1 ? "month" : "months"} deposit stated`;
+  const amenityNames = property.amenities.map((amenity) => amenity.name).slice(0, 3).join(", ");
+  const descriptionText = property.description?.replace(/\s+/g, " ").trim();
+  const description = [
+    `${property.title}: ${type} for rent in ${where}, Meru.`,
+    `Listed rent ${rent}; ${deposit}.`,
+    amenityNames ? `Features include ${amenityNames}.` : "",
+    descriptionText || "Contact the lister to confirm availability and viewing details.",
+  ].filter(Boolean).join(" ").slice(0, 160);
 
   return {
-    title: property.title,
-    description:
-      property.description?.slice(0, 160) ??
-      `${property.title} in ${where} — ${rent} on Kheja_Link.`,
+    title: `${property.title} for rent in ${where}, Meru - ${rent}`,
+    description,
+    ...(property.status === "published" ? { alternates: canonicalAlternates(`/properties/${slug}`) } : {}),
+    robots: property.status === "published"
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
     openGraph: {
       title: `${property.title} — ${rent}`,
-      description: `${where} · ${property.property_type?.name ?? "Rental"} on Kheja_Link`,
+      description,
+      locale: "en_KE",
+      url: `/properties/${slug}`,
+      images: property.images[0]?.public_url ? [property.images[0].public_url] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${property.title} — ${rent}`,
+      description,
       images: property.images[0]?.public_url ? [property.images[0].public_url] : undefined,
     },
   };
@@ -98,6 +122,56 @@ export default async function PropertyDetailPage({
   );
   const size = formatSize(property.size_sqft);
   const availability = availabilityLabel(property.availability, property.available_from);
+  const siteUrl = getSiteUrl();
+  const locationSlug = property.location?.slug;
+  const rentalAreaPath = locationSlug
+    ? getMeruAreaPathForLocation(locationSlug) ?? `/areas/${locationSlug}`
+    : "/houses-for-rent-meru";
+  const propertyUrl = `${siteUrl}/properties/${property.slug}`;
+  const breadcrumbs = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Meru rentals", item: `${siteUrl}/houses-for-rent-meru` },
+      { "@type": "ListItem", position: 3, name: property.location?.name ?? "Rental areas", item: `${siteUrl}${rentalAreaPath}` },
+      { "@type": "ListItem", position: 4, name: property.title, item: propertyUrl },
+    ],
+  };
+  const propertyTypeSlug = property.property_type?.slug;
+  const schemaType = ["bungalow", "maisonette"].includes(propertyTypeSlug ?? "")
+    ? "SingleFamilyResidence"
+    : ["apartment", "bedsitter", "studio"].includes(propertyTypeSlug ?? "")
+      ? "Apartment"
+      : null;
+  const propertySchema = property.status === "published" && schemaType ? {
+    "@context": "https://schema.org",
+    "@type": schemaType,
+    "@id": `${propertyUrl}#property`,
+    url: propertyUrl,
+    name: property.title,
+    description: property.description || `${property.title} for rent in ${property.location?.name ?? "Meru"}, Meru County, Kenya.`,
+    image: property.images.map((image) => image.public_url),
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: property.location?.name ?? "Meru",
+      addressRegion: "Meru County",
+      addressCountry: "KE",
+    },
+    numberOfBedrooms: property.bedrooms || undefined,
+    numberOfBathroomsTotal: property.bathrooms || undefined,
+    floorSize: property.size_sqft ? {
+      "@type": "QuantitativeValue",
+      value: property.size_sqft,
+      unitCode: "FTK",
+    } : undefined,
+    offers: {
+      "@type": "Offer",
+      url: propertyUrl,
+      price: property.price_amount,
+      priceCurrency: property.price_currency,
+    },
+  } : null;
 
   const facts = [
     property.bedrooms > 0 && { icon: BedDouble, label: "Bedrooms", value: String(property.bedrooms) },
@@ -123,9 +197,22 @@ export default async function PropertyDetailPage({
   return (
     <div className="min-h-screen bg-background font-sans selection:bg-blue-100 dark:selection:bg-blue-900/30">
       <Navbar profile={profile} />
+      {property.status === "published" && <StructuredData data={breadcrumbs} />}
+      {propertySchema && <StructuredData data={propertySchema} />}
 
       <main className="pt-28 sm:pt-32 md:pt-40 pb-20 sm:pb-28 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
+          <nav aria-label="Breadcrumb" className="text-sm font-semibold text-zinc-600 dark:text-zinc-400">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li><Link href="/">Home</Link></li>
+              <li aria-hidden="true">/</li>
+              <li><Link href="/houses-for-rent-meru">Meru rentals</Link></li>
+              <li aria-hidden="true">/</li>
+              <li><Link href={rentalAreaPath}>{property.location?.name ?? "Rental areas"}</Link></li>
+              <li aria-hidden="true">/</li>
+              <li aria-current="page" className="max-w-52 truncate text-zinc-900 dark:text-white">{property.title}</li>
+            </ol>
+          </nav>
           <Link
             href="/properties"
             className="inline-flex items-center gap-2 text-sm font-black text-zinc-500 hover:text-blue-600 transition-colors"
@@ -208,7 +295,11 @@ export default async function PropertyDetailPage({
           <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-8 sm:gap-12">
             {/* Left column */}
               <div className="space-y-8 sm:space-y-12 min-w-0">
-              <PropertyGallery images={property.images} title={property.title} />
+              <PropertyGallery
+                images={property.images}
+                title={property.title}
+                propertyType={property.property_type?.name}
+              />
 
               {/* Key facts */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

@@ -4,8 +4,10 @@ import Navbar from "@/components/Navbar";
 import AdminSidebar, { type Counts } from "@/components/admin/AdminSidebar";
 import AdminMfaGate from "@/components/admin/AdminMfaGate";
 import { createClient, getCurrentProfile } from "@/lib/supabase/server";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 /**
  * The Kheja_Link team's back office: a grouped sidebar (a scrolling row on

@@ -31,15 +31,6 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
     <section className="relative flex min-h-[min(72vh,44rem)] flex-col items-center justify-center overflow-hidden px-4 pb-8 pt-24 sm:px-6 sm:pt-28">
       <div aria-hidden="true" className="home-hero-photo absolute inset-0 bg-cover bg-center" />
       <div aria-hidden="true" className="home-hero-scrim absolute inset-0" />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1]">
-        <div
-          className="absolute inset-0 opacity-70"
-          style={{
-            backgroundImage:
-              "radial-gradient(ellipse at 15% 18%, rgba(59, 130, 246, 0.38) 0%, transparent 45%), radial-gradient(ellipse at 86% 80%, rgba(16, 185, 129, 0.28) 0%, transparent 48%), radial-gradient(ellipse at 76% 12%, rgba(168, 85, 247, 0.22) 0%, transparent 40%)",
-          }}
-        />
-      </div>
       <div className="relative z-10 w-full max-w-5xl space-y-8 rounded-[2rem] border border-white/35 bg-white/52 p-5 text-center shadow-2xl shadow-black/10 backdrop-blur-sm dark:border-white/10 dark:bg-[#171717]/68 sm:space-y-10 sm:rounded-[2.5rem] sm:p-8 md:p-10">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -56,10 +47,10 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
             <Home className="h-4 w-4 text-blue-700 dark:text-blue-400" aria-hidden="true" />
             <span>Long-term rentals in Meru</span>
           </motion.div>
-          <h1 className="text-balance text-5xl font-black leading-[0.98] tracking-tighter text-zinc-900 dark:text-white sm:text-6xl md:text-8xl">
-            Find your <br className="hidden sm:block" />
+          <h1 className="text-balance text-4xl font-black leading-[0.98] tracking-tighter text-zinc-900 dark:text-white sm:text-6xl md:text-7xl">
+            Houses and <br className="sm:hidden" /> apartments <br className="hidden sm:block" />
             <span className="relative inline-block text-blue-700 dark:text-blue-400">
-              next home.
+              for rent in Meru.
               <motion.span
                 aria-hidden="true"
                 initial={{ width: 0 }}
@@ -82,12 +73,8 @@ export default function Hero({ locations = [] }: { locations?: LocationRow[] }) 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
-          className="group relative mx-auto w-full max-w-3xl"
+          className="relative mx-auto w-full max-w-3xl"
         >
-          <div
-            aria-hidden="true"
-            className="absolute -inset-1 rounded-[1.8rem] bg-gradient-to-r from-blue-600 via-emerald-500 to-purple-600 opacity-25 blur transition-opacity duration-300 group-hover:opacity-40"
-          />
           <form
             onSubmit={handleSubmit}
             className="relative flex flex-col items-stretch gap-2 rounded-2xl border border-zinc-200/90 bg-white/90 p-2 shadow-lg shadow-zinc-900/5 backdrop-blur-sm dark:border-zinc-700/90 dark:bg-zinc-900/90 sm:rounded-3xl md:flex-row md:items-center"

@@ -7,6 +7,7 @@ import LoginForm from "@/components/LoginForm";
 export const metadata: Metadata = {
   title: "Sign in",
   description: "Sign in to Kheja_Link to save homes, unlock landlord contacts and manage your listings.",
+  robots: { index: false, follow: false },
 };
 
 export default function LoginPage() {

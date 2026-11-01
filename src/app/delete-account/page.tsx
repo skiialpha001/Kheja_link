@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import LegalPage, { type LegalSection } from "@/components/LegalPage";
 import { getCurrentProfile } from "@/lib/supabase/server";
+import { canonicalAlternates } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Delete your Kheja_Link account",
   description: "How to delete your Kheja_Link account and data, in the app or on the website.",
+  alternates: canonicalAlternates("/delete-account"),
+  openGraph: { locale: "en_KE", url: "/delete-account" },
 };
 
 /**

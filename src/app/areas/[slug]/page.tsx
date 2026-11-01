@@ -9,6 +9,8 @@ import { getLocations } from "@/lib/queries/lookups";
 import { getProperties } from "@/lib/queries/properties";
 import { withFavoriteState } from "@/lib/queries/favorites";
 import { getCurrentProfile } from "@/lib/supabase/server";
+import { getMeruAreaPathForLocation } from "@/lib/seo/meru-rental-areas";
+import { canonicalAlternates } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -31,14 +33,17 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const hasListings = Boolean(result?.total);
   const subtitle = [area.area, area.county].filter(Boolean).join(", ");
   const title = `Houses for Rent in ${area.name}, Meru`;
+  const groupedAreaPath = getMeruAreaPathForLocation(area.slug);
 
   return {
     title,
     description: hasListings
       ? `Browse ${result?.total} current long-term rental${result?.total === 1 ? "" : "s"} in ${area.name}${subtitle ? `, ${subtitle}` : ""}. Compare rent, property type, bedrooms and amenities on Kheja_Link.`
       : `Check current long-term rental availability in ${area.name}, Meru County, on Kheja_Link.`,
-    alternates: { canonical: `/areas/${area.slug}` },
-    robots: hasListings ? { index: true, follow: true } : { index: false, follow: true },
+    alternates: canonicalAlternates(groupedAreaPath ?? `/areas/${area.slug}`),
+    robots: groupedAreaPath
+      ? { index: false, follow: true }
+      : hasListings ? { index: true, follow: true } : { index: false, follow: true },
     openGraph: {
       type: "website",
       title,

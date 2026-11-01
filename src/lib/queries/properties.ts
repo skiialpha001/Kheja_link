@@ -166,6 +166,48 @@ export async function getFeaturedProperties(
   return items;
 }
 
+/** Published listings for a configured group of public location slugs. */
+export async function getPropertiesForLocations(
+  locationSlugs: string[],
+  perPage = 24,
+): Promise<Paginated<PropertyListItem>> {
+  const page = 1;
+  const safePerPage = Math.min(MAX_PER_PAGE, Math.max(1, perPage));
+  if (locationSlugs.length === 0) {
+    return { items: [], total: 0, page, perPage: safePerPage, pageCount: 0 };
+  }
+
+  const supabase = await createClient();
+  const { data: locations, error: locationError } = await supabase
+    .from("locations")
+    .select("id")
+    .in("slug", locationSlugs);
+
+  if (locationError) throw new Error(`Could not load rental locations: ${locationError.message}`);
+  const locationIds = (locations ?? []).map((location) => location.id);
+  if (locationIds.length === 0) {
+    return { items: [], total: 0, page, perPage: safePerPage, pageCount: 0 };
+  }
+
+  const { data, error, count } = await supabase
+    .from("properties")
+    .select(LIST_SELECT, { count: "exact" })
+    .eq("status", "published")
+    .in("location_id", locationIds)
+    .order("published_at", { ascending: false, nullsFirst: false })
+    .limit(safePerPage);
+
+  if (error) throw new Error(`Could not load area rentals: ${error.message}`);
+  const total = count ?? 0;
+  return {
+    items: normaliseImages((data ?? []) as unknown as PropertyListItem[]),
+    total,
+    page,
+    perPage: safePerPage,
+    pageCount: Math.ceil(total / safePerPage),
+  };
+}
+
 export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | null> {
   const supabase = await createClient();
 

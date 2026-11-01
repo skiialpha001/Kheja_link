@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import LegalPage, { type LegalSection } from "@/components/LegalPage";
 import { getCurrentProfile } from "@/lib/supabase/server";
+import { canonicalAlternates } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,8 @@ export const metadata: Metadata = {
   title: "Privacy Policy",
   description:
     "What Kheja_Link collects in the app and on the website, why, who can see it, and how to delete your account.",
+  alternates: canonicalAlternates("/privacy"),
+  openGraph: { locale: "en_KE", url: "/privacy" },
 };
 
 /**

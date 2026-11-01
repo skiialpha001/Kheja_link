@@ -8,7 +8,19 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       // Nothing behind a login should be crawled.
-      disallow: ["/dashboard", "/account", "/favorites", "/auth", "/login", "/signup"],
+      disallow: [
+        "/admin",
+        "/dashboard",
+        "/tenant",
+        "/landlord",
+        "/account",
+        "/favorites",
+        "/auth",
+        "/login",
+        "/register",
+        "/signup",
+        "/api",
+      ],
     },
     sitemap: `${siteUrl}/sitemap.xml`,
   };

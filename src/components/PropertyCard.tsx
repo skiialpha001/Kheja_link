@@ -24,6 +24,8 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
   const phone = normalisePhone(property.contact_phone);
   const href = `/properties/${property.slug}`;
   const availability = availabilityLabel(property.availability, property.available_from);
+  const imageLocation = property.location?.name ?? "Meru";
+  const imageAlt = `${property.title} - ${property.property_type?.name ?? "rental"} for rent in ${imageLocation}, Meru${cover?.alt_text?.trim() ? `: ${cover.alt_text.trim()}` : ""}`;
 
   const handleToggleFavorite = (event: React.MouseEvent) => {
     event.preventDefault();
@@ -61,9 +63,11 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
         <Link href={href} aria-label={property.title} className="absolute inset-0 z-10" />
         <Image
           src={cover?.public_url ?? FALLBACK_IMAGE}
-          alt={cover?.alt_text ?? property.title}
+          alt={imageAlt}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          loading="lazy"
+          decoding="async"
           className="object-cover transition-transform duration-1000 group-hover:scale-110"
         />
         {/* Badges */}

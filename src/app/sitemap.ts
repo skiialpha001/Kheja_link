@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/supabase/env";
+import { getMeruAreaPathForLocation, MERU_RENTAL_AREAS, MERU_RENTAL_HUB } from "@/lib/seo/meru-rental-areas";
 
 export const revalidate = 3600;
 
@@ -34,11 +35,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .map((property) => property.location?.slug)
         .filter((slug): slug is string => Boolean(slug)),
     );
+    const activeAreaPaths = MERU_RENTAL_AREAS
+      .filter((area) => area.locationSlugs.some((slug) => areaSlugs.has(slug)))
+      .map((area) => ({
+        url: `${siteUrl}${area.path}`,
+        changeFrequency: "daily" as const,
+        priority: 0.8,
+      }));
+    const mappedAreaSlugs = new Set(MERU_RENTAL_AREAS.flatMap((area) => area.locationSlugs));
 
     return [
       ...staticRoutes,
+      ...(publicListings.length > 0
+        ? [{ url: `${siteUrl}${MERU_RENTAL_HUB.path}`, changeFrequency: "daily" as const, priority: 0.9 }]
+        : []),
+      ...activeAreaPaths,
       { url: `${siteUrl}/areas`, changeFrequency: "weekly", priority: 0.7 },
-      ...[...areaSlugs].map((slug) => ({
+      ...[...areaSlugs].filter((slug) => !mappedAreaSlugs.has(slug)).map((slug) => ({
         url: `${siteUrl}/areas/${slug}`,
         changeFrequency: "daily" as const,
         priority: 0.75,

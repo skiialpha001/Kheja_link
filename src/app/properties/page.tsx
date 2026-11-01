@@ -13,6 +13,7 @@ import { getAmenities, getLocations, getPriceBounds, getPropertyTypes } from "@/
 import { getCurrentProfile } from "@/lib/supabase/server";
 import type { PropertyFilters, PropertySort } from "@/lib/types";
 import { PROPERTY_SORTS } from "@/lib/types";
+import { canonicalAlternates } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   title: "Search Rentals",
   description:
     "Search every long-term rental on Kheja_Link — filter by area, house type, rent, bedrooms and amenities across Meru.",
-  alternates: { canonical: "/properties" },
+  alternates: canonicalAlternates("/properties"),
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;

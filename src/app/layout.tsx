@@ -5,6 +5,8 @@ import AIChatAssistant from "@/components/AIChatAssistant";
 import PrivacyAwareAnalytics from "@/components/PrivacyAwareAnalytics";
 import ThemeProvider from "@/components/ThemeProvider";
 import { getSiteUrl } from "@/lib/supabase/env";
+import StructuredData from "@/components/StructuredData";
+import { SOCIAL } from "@/lib/social";
 import "./globals.css";
 
 const geist = Geist({
@@ -21,33 +23,27 @@ const ADSENSE_CLIENT = "ca-pub-3771359841277271";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Kheja_Link | Find Your Next Home in Meru",
-    template: "%s | Kheja_Link",
+    default: "KhejaLink | Houses, Bedsitters & Apartments for Rent in Meru, Kenya",
+    template: "%s | KhejaLink",
   },
   description:
-    "Kheja_Link is the modern way to find long-term rentals in Meru, Kenya — apartments, bedsitters, single rooms, family homes and shops, all verified and searchable in one place.",
-  keywords: [
-    "Kheja_Link",
-    "houses for rent in Meru",
-    "Meru rentals",
-    "apartments Meru",
-    "bedsitters Meru",
-    "student rooms MUST",
-    "shops to let Meru",
-  ],
+    "Browse current houses, bedsitters, single rooms, apartments and shops for rent in Meru, Kenya. Search Kaaga, Makutano, Gitoro, Nchiru, Nkubu and Meru Town, compare listed rent and contact listers.",
   applicationName: "Kheja_Link",
   openGraph: {
     type: "website",
     siteName: "Kheja_Link",
-    title: "Kheja_Link | Find Your Next Home in Meru",
+    locale: "en_KE",
+    title: "KhejaLink | Houses, Bedsitters & Apartments for Rent in Meru, Kenya",
     description:
-      "Discover, search and filter long-term rentals across Meru — then unlock the landlord's contact and call them directly.",
+      "Browse current long-term rentals in Meru County, compare listing details and contact listers directly.",
     url: siteUrl,
+    images: [{ url: "/home-hero-light.webp", alt: "A home available to rent in Meru, Kenya" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Kheja_Link | Find Your Next Home in Meru",
-    description: "The modern way to find long-term rentals in Meru, Kenya.",
+    title: "KhejaLink | Rentals in Meru, Kenya",
+    description: "Browse houses, bedsitters and apartments for rent across Meru County.",
+    images: ["/home-hero-light.webp"],
   },
   robots: { index: true, follow: true },
   // AdSense site-ownership verification (the meta-tag method).
@@ -66,9 +62,31 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Kheja_Link",
+    url: siteUrl,
+    logo: new URL("/khejalink-logo.jpeg", siteUrl).toString(),
+    description:
+      "A rental property discovery platform for long-term homes and commercial spaces in Meru County, Kenya.",
+    areaServed: [
+      "Meru Town",
+      "Kaaga",
+      "Kithoka",
+      "Makutano",
+      "Gitoro",
+      "Nchiru",
+      "Nkubu",
+      "Kaithe",
+    ].map((name) => ({ "@type": "Place", name })),
+    sameAs: [SOCIAL.tiktok.url],
+  };
+
   return (
-    <html lang="en" className={geist.variable} suppressHydrationWarning>
+    <html lang="en-KE" className={geist.variable} suppressHydrationWarning>
       <head>
+        <StructuredData data={organizationSchema} />
         {/* Google AdSense: verifies the site and serves ads. Exactly Google's
             snippet — a plain async script in the head of every page. */}
         <script

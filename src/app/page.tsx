@@ -9,6 +9,13 @@ import { getProperties } from "@/lib/queries/properties";
 import { withFavoriteState } from "@/lib/queries/favorites";
 import { getLocations } from "@/lib/queries/lookups";
 import { getCurrentProfile } from "@/lib/supabase/server";
+import type { Metadata } from "next";
+import { canonicalAlternates } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = {
+  alternates: canonicalAlternates("/"),
+  openGraph: { locale: "en_KE", url: "/" },
+};
 
 // Rendered per request: the navbar and the saved-home hearts depend on the
 // visitor's session, which is read from cookies.

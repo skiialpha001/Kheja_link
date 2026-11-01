@@ -6,6 +6,7 @@ import Link from "next/link";
 import { LogoMark } from "@/components/Logo";
 import { TikTokIcon, WhatsAppIcon } from "@/components/SocialIcons";
 import { SOCIAL } from "@/lib/social";
+import { MERU_RENTAL_AREAS, MERU_RENTAL_HUB } from "@/lib/seo/meru-rental-areas";
 
 const quickLinks = [
   { label: "Search Rentals", href: "/properties" },
@@ -34,7 +35,7 @@ export default function Footer() {
   return (
     <footer className="bg-zinc-950 text-white pt-14 sm:pt-20 pb-8 sm:pb-10 px-5 sm:px-6 overflow-hidden">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 sm:gap-12 lg:gap-14 mb-12 sm:mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-10 sm:gap-12 lg:gap-14 mb-12 sm:mb-16">
           {/* Brand */}
           <div className="space-y-6">
             <Link href="/" className="flex items-center gap-3 group" aria-label="Kheja_Link home">
@@ -83,6 +84,27 @@ export default function Footer() {
                     className="text-zinc-400 hover:text-white transition-colors font-semibold text-base"
                   >
                     {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Local rental hubs */}
+          <div>
+            <h4 className="font-black mb-5 uppercase tracking-widest text-zinc-500 text-[10px]">
+              Meru Rental Locations
+            </h4>
+            <ul className="space-y-3">
+              <li>
+                <Link href={MERU_RENTAL_HUB.path} className="text-zinc-400 hover:text-white transition-colors font-semibold text-base">
+                  All Meru rentals
+                </Link>
+              </li>
+              {MERU_RENTAL_AREAS.map((area) => (
+                <li key={area.slug}>
+                  <Link href={area.path} className="text-zinc-400 hover:text-white transition-colors font-semibold text-base">
+                    {area.name}
                   </Link>
                 </li>
               ))}
