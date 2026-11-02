@@ -13,7 +13,7 @@ import type {
 // contact unlock and come back only through get_property_contact(). `select=*`
 // would be denied outright. `nearby` is the landlord's public description of
 // the location.
-const PROPERTY_COLUMNS = "id, owner_id, title, slug, description, property_type_id, location_id, nearby, price_amount, price_currency, price_period, deposit_months, bedrooms, bathrooms, size_sqft, is_premium, is_furnished, status, available_from, view_count, published_at, created_at, updated_at, like_count, house_rules, availability, notice_date";
+const PROPERTY_COLUMNS = "id, owner_id, title, slug, description, property_type_id, location_id, nearby, price_amount, price_currency, price_period, deposit_months, bedrooms, bathrooms, size_sqft, is_premium, is_demo, is_furnished, status, available_from, view_count, published_at, created_at, updated_at, like_count, house_rules, availability, notice_date";
 
 const LIST_SELECT = `
   ${PROPERTY_COLUMNS},

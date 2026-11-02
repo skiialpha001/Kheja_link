@@ -20,16 +20,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const supabase = await createClient();
     const { data } = await supabase
       .from("properties")
-      .select("slug, updated_at, location:locations ( slug )")
+      .select("slug, is_demo, updated_at, location:locations ( slug )")
       .eq("status", "published")
       .order("published_at", { ascending: false })
       .limit(1000);
 
-    const publicListings = (data ?? []) as unknown as {
+    const publicListings = ((data ?? []) as unknown as {
       slug: string;
+      is_demo: boolean;
       updated_at: string | null;
       location: { slug: string } | null;
-    }[];
+    }[]).filter((property) => !property.is_demo);
     const areaSlugs = new Set(
       publicListings
         .map((property) => property.location?.slug)

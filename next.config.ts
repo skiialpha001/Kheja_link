@@ -48,6 +48,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Keep server output tracing rooted at this app when the user profile has a
+  // separate Node project and lockfile above the repository.
+  outputFileTracingRoot: process.cwd(),
   // Do not advertise the framework.
   poweredByHeader: false,
   async headers() {
@@ -79,6 +82,8 @@ const nextConfig: NextConfig = {
             },
           ])
         : []),
+      // Temporary, clearly labelled illustrative images on demo listings.
+      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
     ],
   },
 };

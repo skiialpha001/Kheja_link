@@ -49,6 +49,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
   if (!property) return { title: "Home not found" };
 
+  const isDemoListing = property.is_demo;
   const where = property.location?.name ?? "Meru";
   const rent = formatRent(property.price_amount, property.price_period, property.price_currency);
   const type = property.property_type?.name ?? "Rental";
@@ -56,6 +57,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const amenityNames = property.amenities.map((amenity) => amenity.name).slice(0, 3).join(", ");
   const descriptionText = property.description?.replace(/\s+/g, " ").trim();
   const description = [
+    isDemoListing ? "DEMO listing, not a real rental. " : "",
     `${property.title}: ${type} for rent in ${where}, Meru.`,
     `Listed rent ${rent}; ${deposit}.`,
     amenityNames ? `Features include ${amenityNames}.` : "",
@@ -65,8 +67,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return {
     title: `${property.title} for rent in ${where}, Meru - ${rent}`,
     description,
-    ...(property.status === "published" ? { alternates: canonicalAlternates(`/properties/${slug}`) } : {}),
-    robots: property.status === "published"
+    ...(property.status === "published" && !isDemoListing ? { alternates: canonicalAlternates(`/properties/${slug}`) } : {}),
+    robots: property.status === "published" && !isDemoListing
       ? { index: true, follow: true }
       : { index: false, follow: false },
     openGraph: {
@@ -105,6 +107,7 @@ export default async function PropertyDetailPage({
 
   // Owners can preview their own drafts; everyone else only sees published homes.
   const isOwner = property.owner_id === user?.id;
+  const isDemoListing = property.is_demo;
   if (property.status !== "published" && !isOwner) notFound();
 
   const [favoriteIds, similar] = await Promise.all([
@@ -113,7 +116,7 @@ export default async function PropertyDetailPage({
   ]);
   const similarWithState = await withFavoriteState(similar);
 
-  if (property.status === "published") void recordPropertyView(property.id);
+  if (property.status === "published" && !isDemoListing) void recordPropertyView(property.id);
 
   const phone = normalisePhone(property.contact_phone);
   const whatsapp = whatsappLink(
@@ -144,7 +147,7 @@ export default async function PropertyDetailPage({
     : ["apartment", "bedsitter", "studio"].includes(propertyTypeSlug ?? "")
       ? "Apartment"
       : null;
-  const propertySchema = property.status === "published" && schemaType ? {
+  const propertySchema = property.status === "published" && !isDemoListing && schemaType ? {
     "@context": "https://schema.org",
     "@type": schemaType,
     "@id": `${propertyUrl}#property`,
@@ -242,6 +245,11 @@ export default async function PropertyDetailPage({
                     Premium
                   </span>
                 )}
+                {isDemoListing && (
+                  <span className="px-4 py-2 rounded-2xl border border-amber-300 bg-amber-100 text-amber-950 text-[10px] font-black uppercase tracking-widest">
+                    Demo · Not a real rental
+                  </span>
+                )}
                 {property.is_furnished && (
                   <span className="px-4 py-2 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest">
                     Furnished
@@ -285,10 +293,12 @@ export default async function PropertyDetailPage({
                   ).replace(/ \/ (month|year)$/, "")}
                 </p>
               </div>
-              <FavoriteButton
-                propertyId={property.id}
-                initiallyFavorited={favoriteIds.has(property.id)}
-              />
+              {!isDemoListing && (
+                <FavoriteButton
+                  propertyId={property.id}
+                  initiallyFavorited={favoriteIds.has(property.id)}
+                />
+              )}
             </div>
           </header>
 
@@ -385,6 +395,16 @@ export default async function PropertyDetailPage({
 
             {/* Right column — sticky contact rail */}
             <aside id="contact" className="space-y-6 lg:sticky lg:top-32 lg:self-start scroll-mt-32">
+              {isDemoListing ? (
+                <div className="rounded-3xl border border-amber-300 bg-amber-50 p-5 sm:p-8 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+                  <p className="text-xs font-black uppercase tracking-widest">Demo listing · Not real</p>
+                  <h2 className="mt-3 text-xl font-black">Interface sample only</h2>
+                  <p className="mt-3 text-sm font-medium leading-relaxed">
+                    This fictional entry is here to preview the listings interface. It is not available to rent. There is no real landlord, contact, address, or payment to make. Do not visit or send money.
+                  </p>
+                </div>
+              ) : (
+                <>
               <div className="p-5 sm:p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-6">
                 <div className="flex items-center gap-4">
                   <span className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl font-black">
@@ -478,6 +498,8 @@ export default async function PropertyDetailPage({
                     {reporting ? "Ask a question instead" : "Report this listing"}
                   </Link>
                 </p>
+              )}
+                </>
               )}
 
               <p className="px-4 text-xs font-medium text-zinc-400 leading-relaxed text-center">

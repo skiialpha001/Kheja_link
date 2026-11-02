@@ -97,6 +97,7 @@ export type PropertyRow = Timestamps & {
   bathrooms: number;
   size_sqft: number | null;
   is_premium: boolean;
+  is_demo: boolean;
   is_furnished: boolean;
   status: PropertyStatus;
   available_from: string | null;

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Heart, MapPin, BedDouble, Bath, Square, Phone, ArrowUpRight, Loader2 } from "lucide-react";
+import { Heart, MapPin, BedDouble, Bath, Square, Phone, PhoneOff, ArrowUpRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,14 +22,18 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
   const cover = property.images?.[0];
   const size = formatSize(property.size_sqft);
   const phone = normalisePhone(property.contact_phone);
+  const isDemo = property.is_demo;
   const href = `/properties/${property.slug}`;
   const availability = availabilityLabel(property.availability, property.available_from);
   const imageLocation = property.location?.name ?? "Meru";
-  const imageAlt = `${property.title} - ${property.property_type?.name ?? "rental"} for rent in ${imageLocation}, Meru${cover?.alt_text?.trim() ? `: ${cover.alt_text.trim()}` : ""}`;
+  const imageAlt = isDemo
+    ? `Illustrative demo image, not a real property: ${property.title}`
+    : `${property.title} - ${property.property_type?.name ?? "rental"} for rent in ${imageLocation}, Meru${cover?.alt_text?.trim() ? `: ${cover.alt_text.trim()}` : ""}`;
 
   const handleToggleFavorite = (event: React.MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
+    if (isDemo) return;
 
     // Optimistic — reverted below if the server disagrees.
     const next = !isLiked;
@@ -81,6 +85,11 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
                 Premium
               </span>
             )}
+            {isDemo && (
+              <span className="rounded-xl border border-amber-200 bg-amber-100 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider text-amber-950 sm:text-[10px]">
+                Demo · Not real
+              </span>
+            )}
             {availability && (
               <span
                 className={`rounded-xl px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-wider text-white sm:text-[10px] ${
@@ -97,10 +106,10 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
           </div>
           <button
             onClick={handleToggleFavorite}
-            disabled={isPending}
+            disabled={isPending || isDemo}
             aria-pressed={isLiked}
-            aria-label={isLiked ? "Remove from saved homes" : "Save this home"}
-            className="group/heart flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-zinc-950/75 transition-colors hover:bg-zinc-950 disabled:opacity-70 sm:h-11 sm:w-11"
+            aria-label={isDemo ? "Saving is disabled for demo listings" : isLiked ? "Remove from saved homes" : "Save this home"}
+            className="group/heart flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-zinc-950/75 transition-colors hover:bg-zinc-950 disabled:cursor-not-allowed disabled:opacity-70 sm:h-11 sm:w-11"
           >
             {isPending ? (
               <Loader2 className="w-5 h-5 text-white animate-spin" />
@@ -187,7 +196,17 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
           >
             View Details
           </Link>
-          {phone ? (
+          {isDemo ? (
+            <button
+              type="button"
+              disabled
+              aria-label="Contact disabled for demo listing"
+              title="Demo listing: contact is disabled"
+              className="w-14 h-14 flex items-center justify-center bg-zinc-300 text-zinc-600 rounded-2xl shrink-0 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-300"
+            >
+              <PhoneOff className="w-6 h-6" />
+            </button>
+          ) : phone ? (
             <a
               href={`tel:${phone}`}
               aria-label={`Call about ${property.title}`}
