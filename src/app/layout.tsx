@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   },
   description:
     "Browse current houses, bedsitters, single rooms, apartments and shops for rent in Meru, Kenya. Search Kaaga, Makutano, Gitoro, Nchiru, Nkubu and Meru Town, compare listed rent and contact listers.",
+  verification: {
+    google: "_QaIL6R74M7mIBK2kdSJMncpj7dfTx8VI0wiPmdq5fw",
+  },
   applicationName: "Kheja_Link",
   openGraph: {
     type: "website",
