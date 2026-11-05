@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { TikTokIcon } from "@/components/SocialIcons";
+import { SOCIAL } from "@/lib/social";
 import {
   ArrowRight,
   Box,
@@ -108,13 +110,13 @@ export default function MoveMateMoversPage() {
 
       <section className="relative isolate overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#f3f5f2] dark:bg-zinc-900" />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 opacity-[0.18] blur-[2px] dark:opacity-[0.12]">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 overflow-hidden opacity-[0.18] blur-[3px] dark:opacity-[0.12]">
           <Image
             src="/movemate-movers-logo.png"
             alt=""
             fill
             sizes="100vw"
-            className="object-contain object-center mix-blend-multiply dark:mix-blend-screen"
+            className="scale-110 object-cover object-center mix-blend-multiply dark:mix-blend-screen"
           />
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.3fr_0.7fr] lg:py-24">
@@ -349,12 +351,34 @@ export default function MoveMateMoversPage() {
       </section>
 
       <footer className="bg-zinc-950 px-5 py-8 text-sm text-zinc-300 sm:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <p>MoveMate Movers enquiries · Meru County, Kenya</p>
-          <div className="flex flex-wrap gap-x-5 gap-y-2">
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-6 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/khejalink-logo.jpeg"
+              alt="KhejaLink logo"
+              width={40}
+              height={40}
+              className="h-10 w-10 rounded-full border border-white/20 object-cover"
+            />
+            <div>
+              <p className="font-bold text-white">MoveMate Movers · Meru County</p>
+              <p className="mt-1 text-xs text-zinc-400">A moving service featured by KhejaLink</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
             <Link href="/" className="hover:text-white">KhejaLink home</Link>
             <Link href="/properties" className="hover:text-white">Browse Meru rentals</Link>
             <a href={phoneHref} className="hover:text-white">Call {phoneDisplay}</a>
+            <a
+              href={SOCIAL.tiktok.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Follow KhejaLink on TikTok ${SOCIAL.tiktok.handle}`}
+              className="inline-flex min-h-10 items-center gap-2 rounded-full border border-zinc-700 bg-white/5 px-4 py-2 font-semibold text-zinc-200 transition-colors hover:border-zinc-500 hover:bg-white/10 hover:text-white"
+            >
+              <TikTokIcon className="h-4 w-4" />
+              <span>KhejaLink on TikTok</span>
+            </a>
           </div>
         </div>
       </footer>

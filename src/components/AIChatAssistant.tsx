@@ -17,7 +17,10 @@ interface Message {
   suggestions?: string[];
 }
 
+const MOVE_MATE_SUGGESTION = "Want to be moved?";
+
 const OPENING_SUGGESTIONS = [
+  MOVE_MATE_SUGGESTION,
   "2 bedroom in Makutano under 30k",
   "Rooms near MUST",
   "How do I list my house?",
@@ -253,7 +256,11 @@ export default function AIChatAssistant() {
                           key={suggestion}
                           onClick={() => send(suggestion)}
                           disabled={isTyping}
-                          className="px-3 py-2 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-full text-[11px] font-bold text-zinc-600 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-600 transition-colors disabled:opacity-50"
+                          className={`px-3 py-2 rounded-full border text-[11px] font-bold transition-colors disabled:opacity-50 ${
+                            suggestion === MOVE_MATE_SUGGESTION
+                              ? "motion-safe:animate-pulse border-orange-300 bg-orange-100/80 text-orange-900 hover:border-orange-500 hover:bg-orange-100 dark:border-orange-700 dark:bg-orange-950/60 dark:text-orange-200 dark:hover:bg-orange-950"
+                              : "border-zinc-200 bg-white text-zinc-600 hover:border-blue-500 hover:text-blue-600 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                          }`}
                         >
                           {suggestion}
                         </button>
