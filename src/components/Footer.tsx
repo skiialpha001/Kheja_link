@@ -15,6 +15,7 @@ const quickLinks = [
   { label: "Apartments", href: "/properties?type=apartment" },
   { label: "Bedsitters", href: "/properties?type=bedsitter" },
   { label: "Student Rooms", href: "/properties?type=single_room" },
+  { label: "MoveMate Movers in Meru", href: "/movemate-movers" },
 ];
 
 const supportLinks = [
