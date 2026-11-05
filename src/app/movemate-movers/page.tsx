@@ -75,13 +75,13 @@ export default function MoveMateMoversPage() {
       <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link href="/movemate-movers" className="inline-flex items-center gap-3" aria-label="MoveMate Movers home">
-            <span className="relative h-16 w-20 shrink-0 overflow-hidden rounded-xl border-2 border-[#ff5500] bg-[#ff5500] shadow-sm">
+            <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-[#ff5500] bg-[#ff5500] shadow-sm">
               <Image
                 src="/movemate-movers-logo.png"
                 alt="MoveMate Movers logo"
                 fill
-                sizes="80px"
-                className="object-cover"
+                sizes="64px"
+                className="object-contain"
                 priority
               />
             </span>
@@ -108,13 +108,13 @@ export default function MoveMateMoversPage() {
 
       <section className="relative isolate overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#f3f5f2] dark:bg-zinc-900" />
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 opacity-[0.13] blur-3xl dark:opacity-[0.09]">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 opacity-[0.18] blur-[2px] dark:opacity-[0.12]">
           <Image
             src="/movemate-movers-logo.png"
             alt=""
             fill
             sizes="100vw"
-            className="scale-125 object-contain object-right mix-blend-multiply"
+            className="object-contain object-center mix-blend-multiply dark:mix-blend-screen"
           />
         </div>
         <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.3fr_0.7fr] lg:py-24">
@@ -151,13 +151,13 @@ export default function MoveMateMoversPage() {
           </div>
 
           <aside id="quote-factors" className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-700 dark:bg-zinc-950">
-            <div className="relative overflow-hidden rounded-2xl border-2 border-[#ff5500] bg-[#ff5500]">
+            <div className="mx-auto w-full max-w-[370px] overflow-hidden rounded-2xl border-2 border-[#ff5500] bg-[#ff5500]">
               <Image
                 src="/movemate-movers-logo.png"
                 alt="MoveMate Movers truck and house logo"
-                width={370}
-                height={310}
-                className="h-auto w-full object-cover"
+                width={1024}
+                height={1024}
+                className="h-auto w-full object-contain"
               />
             </div>
             <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff1e8] text-[#c2410c] dark:bg-[#3b2116] dark:text-orange-300">
