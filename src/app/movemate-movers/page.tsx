@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -21,13 +22,13 @@ const whatsappHref =
   "https://wa.me/254710655709?text=Hello%20MoveMate%20Movers.%20I%20would%20like%20to%20ask%20about%20a%20move%20in%20Meru.";
 
 export const metadata: Metadata = {
-  title: "MoveMate Movers in Meru | Moving Quotes from KSh 500",
+  title: "MoveMate Movers in Meru | Request a Moving Quote",
   description:
-    "Contact MoveMate Movers about house, bedsitter, student-room and office moves in Meru. Prices start at KSh 500; the final quote depends on your items and floor levels at pickup and delivery.",
+    "Contact MoveMate Movers about house, bedsitter, student-room and office moves in Meru. Request a quote based on your items, route, number of movers and floor access at pickup and delivery.",
   alternates: { canonical: "/movemate-movers" },
   openGraph: {
     type: "website",
-    title: "MoveMate Movers in Meru | Moving Quotes from KSh 500",
+    title: "MoveMate Movers in Meru | Request a Moving Quote",
     description:
       "Request a moving quote in Meru. Share your items, route, pickup floor and destination floor directly with MoveMate Movers.",
     url: "/movemate-movers",
@@ -74,23 +75,23 @@ export default function MoveMateMoversPage() {
       <header className="border-b border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link href="/movemate-movers" className="inline-flex items-center gap-3" aria-label="MoveMate Movers home">
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-800 text-white">
-              <Truck aria-hidden="true" className="h-6 w-6" />
+            <span className="relative h-16 w-20 shrink-0 overflow-hidden rounded-xl border-2 border-[#ff5500] bg-[#ff5500] shadow-sm">
+              <Image
+                src="/movemate-movers-logo.png"
+                alt="MoveMate Movers logo"
+                fill
+                sizes="80px"
+                className="object-cover"
+                priority
+              />
             </span>
-            <span className="leading-tight">
-              <span className="block text-lg font-black tracking-tight">
-                <span className="text-emerald-800 dark:text-emerald-400">Move</span>
-                <span className="text-rose-900 dark:text-rose-400">Mate</span>
-              </span>
-              <span className="block text-[10px] font-bold tracking-[0.24em] text-zinc-600 dark:text-zinc-400">
-                MOVERS
-              </span>
-            </span>
+            <span className="sr-only">MoveMate Movers</span>
           </Link>
 
           <nav aria-label="Page navigation" className="hidden items-center gap-6 text-sm font-semibold text-zinc-700 md:flex dark:text-zinc-300">
             <a href="#services" className="hover:text-emerald-800 dark:hover:text-emerald-400">Moving help</a>
-            <a href="#pricing" className="hover:text-emerald-800 dark:hover:text-emerald-400">Pricing</a>
+            <a href="#quote-factors" className="hover:text-emerald-800 dark:hover:text-emerald-400">Quote factors</a>
+            <a href="#team" className="hover:text-emerald-800 dark:hover:text-emerald-400">MoveMate in action</a>
             <a href="#quote" className="hover:text-emerald-800 dark:hover:text-emerald-400">Request a quote</a>
           </nav>
 
@@ -105,8 +106,18 @@ export default function MoveMateMoversPage() {
         </div>
       </header>
 
-      <section className="border-b border-zinc-200 bg-[#f3f5f2] dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.3fr_0.7fr] lg:py-24">
+      <section className="relative isolate overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#f3f5f2] dark:bg-zinc-900" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 opacity-[0.13] blur-3xl dark:opacity-[0.09]">
+          <Image
+            src="/movemate-movers-logo.png"
+            alt=""
+            fill
+            sizes="100vw"
+            className="scale-125 object-contain object-right mix-blend-multiply"
+          />
+        </div>
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[1.3fr_0.7fr] lg:py-24">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-900/15 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-emerald-900 dark:border-emerald-300/20 dark:bg-zinc-950 dark:text-emerald-300">
               <MapPin aria-hidden="true" className="h-4 w-4" />
@@ -139,27 +150,85 @@ export default function MoveMateMoversPage() {
             </p>
           </div>
 
-          <aside id="pricing" className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-700 dark:bg-zinc-950">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff1e8] text-[#c2410c] dark:bg-[#3b2116] dark:text-orange-300">
+          <aside id="quote-factors" className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8 dark:border-zinc-700 dark:bg-zinc-950">
+            <div className="relative overflow-hidden rounded-2xl border-2 border-[#ff5500] bg-[#ff5500]">
+              <Image
+                src="/movemate-movers-logo.png"
+                alt="MoveMate Movers truck and house logo"
+                width={370}
+                height={310}
+                className="h-auto w-full object-cover"
+              />
+            </div>
+            <div className="mt-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff1e8] text-[#c2410c] dark:bg-[#3b2116] dark:text-orange-300">
               <CircleDollarSign aria-hidden="true" className="h-6 w-6" />
             </div>
-            <p className="mt-6 text-sm font-bold uppercase tracking-[0.16em] text-zinc-600 dark:text-zinc-400">
-              Starting price
+            <p className="mt-4 text-sm font-bold uppercase tracking-[0.16em] text-zinc-600 dark:text-zinc-400">
+              Quote factors
             </p>
-            <p className="mt-1 text-4xl font-black tracking-tight">KSh 500</p>
+            <h2 className="mt-1 text-2xl font-black tracking-tight">Details shape the price</h2>
             <p className="mt-4 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
-              This is a starting rate, not a fixed price for every move. The final quote depends on the items and
-              workload, plus the floor at pickup and the floor at delivery.
+              MoveMate confirms the price directly with you after considering the number of movers, workload, items,
+              route and access at both buildings.
             </p>
             <div className="mt-5 border-t border-zinc-200 pt-5 dark:border-zinc-800">
-              <p className="text-sm font-bold">For an accurate quote, include:</p>
+              <p className="text-sm font-bold">Include these details:</p>
               <ul className="mt-3 space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
                 <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700 dark:text-emerald-400" /> Items and approximate quantity</li>
+                <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700 dark:text-emerald-400" /> Number of movers needed</li>
                 <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700 dark:text-emerald-400" /> Pickup and delivery areas</li>
                 <li className="flex gap-2"><CheckCircle2 aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700 dark:text-emerald-400" /> Floor level at both places</li>
               </ul>
             </div>
           </aside>
+        </div>
+      </section>
+
+      <section id="team" className="border-y border-zinc-200 bg-[#fff7f0] dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
+          <div className="max-w-2xl">
+            <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#c2410c] dark:text-orange-300">MoveMate in action</p>
+            <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">A moving crew with a visible identity</h2>
+            <p className="mt-4 leading-7 text-zinc-700 dark:text-zinc-300">
+              These photos show MoveMate-branded workwear and the team beside a moving truck. Confirm the crew,
+              vehicle and service details directly when you request a quote.
+            </p>
+          </div>
+          <div className="mt-9 grid gap-8 md:grid-cols-2">
+            {[
+              {
+                src: "/movemate-team-by-truck.webp",
+                alt: "Two people beside a truck with a MoveMate Movers vest",
+                caption: "MoveMate-branded equipment beside a moving truck.",
+                width: 960,
+                height: 1280,
+              },
+              {
+                src: "/movemate-team-with-vest.webp",
+                alt: "Two people holding a MoveMate Movers vest beside a truck",
+                caption: "The MoveMate Movers vest and logo shown clearly.",
+                width: 1280,
+                height: 960,
+              },
+            ].map((photo) => (
+              <figure key={photo.src} className="relative isolate">
+                <div className="absolute inset-3 -z-10 overflow-hidden rounded-[2rem] opacity-45 blur-2xl dark:opacity-30">
+                  <Image src={photo.src} alt="" fill sizes="(min-width: 768px) 50vw, 100vw" className="scale-110 object-cover" aria-hidden="true" />
+                </div>
+                <div className="relative overflow-hidden rounded-[2rem] border-4 border-white bg-zinc-200 shadow-xl dark:border-zinc-800 dark:bg-zinc-800">
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    width={photo.width}
+                    height={photo.height}
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="h-auto w-full object-cover"
+                  />
+                </div>
+                <figcaption className="mt-3 text-sm font-semibold text-zinc-700 dark:text-zinc-300">{photo.caption}</figcaption>
+              </figure>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -258,11 +327,10 @@ export default function MoveMateMoversPage() {
           <h2 className="text-2xl font-black tracking-tight">Before you book</h2>
           <div className="mt-6 grid gap-6 md:grid-cols-2">
             <article>
-              <h3 className="font-bold">Is KSh 500 the final price?</h3>
+              <h3 className="font-bold">How is the price confirmed?</h3>
               <p className="mt-2 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
-                No. MoveMate&apos;s starting rate is KSh 500, not a fixed price for every move. The final amount depends
-                on the workload and items, and the floor level at both the pickup and destination. Ask MoveMate for a
-                confirmed quote.
+                Tell MoveMate the number of movers, workload and items, route, and floor level at both the pickup and
+                destination so they can confirm the final quote.
               </p>
             </article>
             <article>

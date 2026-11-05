@@ -641,6 +641,25 @@ export const KNOWLEDGE: KnowledgeEntry[] = [
     },
   },
   {
+    id: "movemate-movers",
+    priority: 88,
+    patterns: [
+      /\bmovemate\b/,
+      /\bmove\s+mate\b/,
+      /\b(moving company|moving service|movers?)\b.*\b(meru|quote|contact|kheja)\b/,
+      /\b(meru|quote|contact|kheja)\b.*\b(moving company|moving service|movers?)\b/,
+    ],
+    answer: () => ({
+      message:
+        `MoveMate Movers has a dedicated landing page for moving enquiries in Meru. ` +
+        `You can share the items, route, number of movers, and the floor or access details at both locations so ` +
+        `MoveMate can confirm availability and the final quote directly.`,
+      href: "/movemate-movers",
+      hrefLabel: "Open MoveMate Movers",
+      suggestions: ["How do I request a moving quote?", "Show me rentals in Meru"],
+    }),
+  },
+  {
     id: "thanks",
     priority: 95,
     patterns: [/^(thanks|thank you|asante|ok|okay|cool|nice|great|good|perfect)[\s!.]*$/],
