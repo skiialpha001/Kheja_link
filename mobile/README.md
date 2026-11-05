@@ -113,12 +113,14 @@ showing white corners.
 ## Building
 
 ```bash
-flutter build apk --release          # Android APK
-flutter build appbundle --release    # Google Play
+flutter build apk --release --split-per-abi  # ABI-specific Android APKs
+flutter build appbundle --release            # Google Play upload bundle
 flutter build web --release          # Web
 flutter build ipa --release          # iOS (needs macOS)
 ```
 
-Release Android builds are currently signed with the debug key. Before publishing to Play,
-create an upload keystore and add `android/key.properties` — see
-<https://docs.flutter.dev/deployment/android#signing-the-app>.
+Android release builds require a valid local `android/key.properties` and the production
+keystore. The Gradle configuration validates the keystore and credentials, then fails the
+release task if any required value is missing or invalid; it never falls back to the debug
+key. Keep `key.properties` and the keystore backed up securely and out of Git. See
+<https://docs.flutter.dev/deployment/android#signing-the-app> for Android signing guidance.

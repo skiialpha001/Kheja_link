@@ -23,11 +23,16 @@ See [`mobile/README.md`](mobile/README.md) for the Flutter app.
 - **GitHub Pages link:** [skiialpha001.github.io/Kheja_link](https://skiialpha001.github.io/Kheja_link/) (forwards to the live website)
 - **Canonical source repository:** [skiialpha001/Kheja_link](https://github.com/skiialpha001/Kheja_link)
 
-### Download the Android app
+### Latest Android release: v1.7.3
 
-**[Download Kheja_Link for Android](https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.2/app-arm64-v8a-release.apk)** (27 MB) — works on almost every phone from the last several years.
+- **[Download for most Android phones (ARM64)](https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.3/app-arm64-v8a-release.apk)** (about 27 MB).
+- **[Download for older 32-bit ARM devices](https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.3/app-armeabi-v7a-release.apk)** (about 25 MB).
+- **[Download for x86_64 devices](https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.3/app-x86_64-release.apk)** (about 29 MB).
+- See every build on the [GitHub releases page](https://github.com/skiialpha001/Kheja_link/releases/latest).
 
-Older 32-bit devices want [this build](https://github.com/skiialpha001/Kheja_link/releases/download/v1.7.2/app-armeabi-v7a-release.apk) instead, and all builds are listed on the [releases page](https://github.com/skiialpha001/Kheja_link/releases/latest).
+Version 1.7.3 adds privacy guidance and validation to public listing text, and requires a valid production signing key for Android release builds.
+
+**Upgrade note:** v1.7.3 uses the same production signing certificate as v1.7.2, so it can be installed as an update. If you are upgrading from v1.4.0, uninstall that version first because it used a different signing certificate.
 
 ---
 
