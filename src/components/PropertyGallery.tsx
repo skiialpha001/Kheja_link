@@ -214,6 +214,16 @@ export default function PropertyGallery({
       <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
         <DialogContent
           showCloseButton
+          onKeyDown={(event) => {
+            if (media.length < 2 || event.target instanceof HTMLVideoElement) return;
+            if (event.key === "ArrowLeft") {
+              event.preventDefault();
+              go(-1);
+            } else if (event.key === "ArrowRight") {
+              event.preventDefault();
+              go(1);
+            }
+          }}
           className="!fixed !inset-0 !left-0 !top-0 !flex !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 !items-center !justify-center !rounded-none !border-0 !p-0 bg-black text-white"
         >
           <DialogTitle className="sr-only">
@@ -242,6 +252,34 @@ export default function PropertyGallery({
               />
             )}
           </div>
+          {media.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => go(-1)}
+                aria-label="Previous photo or video"
+                title="Previous photo or video"
+                className="absolute left-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white shadow-lg transition hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:left-8 sm:h-14 sm:w-14"
+              >
+                <ChevronLeft className="h-7 w-7" aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => go(1)}
+                aria-label="Next photo or video"
+                title="Next photo or video"
+                className="absolute right-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-black/60 text-white shadow-lg transition hover:bg-black/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-8 sm:h-14 sm:w-14"
+              >
+                <ChevronRight className="h-7 w-7" aria-hidden="true" />
+              </button>
+              <div
+                aria-live="polite"
+                className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 rounded-full border border-white/20 bg-black/65 px-4 py-2 text-xs font-bold text-white shadow-lg"
+              >
+                {activeIndex + 1} / {media.length}
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>

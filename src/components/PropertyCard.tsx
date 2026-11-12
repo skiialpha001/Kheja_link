@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Heart, MapPin, BedDouble, Bath, Square, PhoneOff, ArrowUpRight, Loader2 } from "lucide-react";
+import { Heart, MapPin, BedDouble, Bath, Square, ArrowUpRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
 import { availabilityLabel, formatLocation, formatRent, formatSize } from "@/lib/format";
 import type { PropertyListItem } from "@/lib/types";
+import PropertyCardContactAction from "@/components/PropertyCardContactAction";
 
 const FALLBACK_IMAGE =
   "data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600'%3E%3Crect width='800' height='600' fill='%23e4e4e7'/%3E%3C/svg%3E";
@@ -195,15 +196,7 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
           >
             View Details
           </Link>
-          <button
-            type="button"
-            disabled
-            aria-label={`Landlord call details temporarily unavailable for ${property.title}`}
-            title="Landlord call details are temporarily unavailable"
-            className="w-14 h-14 flex items-center justify-center bg-zinc-200 text-zinc-500 rounded-2xl shrink-0 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-400"
-          >
-            <PhoneOff className="w-6 h-6" aria-hidden="true" />
-          </button>
+          <PropertyCardContactAction propertyHref={href} isDemo={isDemo} title={property.title} />
         </div>
       </div>
     </motion.div>
