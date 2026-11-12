@@ -1,14 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Heart, MapPin, BedDouble, Bath, Square, Phone, PhoneOff, ArrowUpRight, Loader2 } from "lucide-react";
+import { Heart, MapPin, BedDouble, Bath, Square, PhoneOff, ArrowUpRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { toggleFavoriteAction } from "@/lib/actions/favorites";
-import { availabilityLabel, formatLocation, formatRent, formatSize, normalisePhone } from "@/lib/format";
+import { availabilityLabel, formatLocation, formatRent, formatSize } from "@/lib/format";
 import type { PropertyListItem } from "@/lib/types";
 
 const FALLBACK_IMAGE =
@@ -21,7 +21,6 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
 
   const cover = property.images?.[0];
   const size = formatSize(property.size_sqft);
-  const phone = normalisePhone(property.contact_phone);
   const isDemo = property.is_demo;
   const href = `/properties/${property.slug}`;
   const availability = availabilityLabel(property.availability, property.available_from);
@@ -196,33 +195,15 @@ export default function PropertyCard({ property }: { property: PropertyListItem 
           >
             View Details
           </Link>
-          {isDemo ? (
-            <button
-              type="button"
-              disabled
-              aria-label="Contact disabled for demo listing"
-              title="Demo listing: contact is disabled"
-              className="w-14 h-14 flex items-center justify-center bg-zinc-300 text-zinc-600 rounded-2xl shrink-0 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-300"
-            >
-              <PhoneOff className="w-6 h-6" />
-            </button>
-          ) : phone ? (
-            <a
-              href={`tel:${phone}`}
-              aria-label={`Call about ${property.title}`}
-              className="w-14 h-14 flex items-center justify-center bg-blue-600 text-white rounded-2xl hover:bg-blue-700 hover:rotate-12 transition-all duration-300 shadow-lg shadow-blue-600/20 shrink-0"
-            >
-              <Phone className="w-6 h-6" />
-            </a>
-          ) : (
-            <Link
-              href={`${href}#contact`}
-              aria-label={`Contact the landlord about ${property.title}`}
-              className="w-14 h-14 flex items-center justify-center bg-blue-600 text-white rounded-2xl hover:bg-blue-700 hover:rotate-12 transition-all duration-300 shadow-lg shadow-blue-600/20 shrink-0"
-            >
-              <Phone className="w-6 h-6" />
-            </Link>
-          )}
+          <button
+            type="button"
+            disabled
+            aria-label={`Landlord call details temporarily unavailable for ${property.title}`}
+            title="Landlord call details are temporarily unavailable"
+            className="w-14 h-14 flex items-center justify-center bg-zinc-200 text-zinc-500 rounded-2xl shrink-0 cursor-not-allowed dark:bg-zinc-700 dark:text-zinc-400"
+          >
+            <PhoneOff className="w-6 h-6" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </motion.div>

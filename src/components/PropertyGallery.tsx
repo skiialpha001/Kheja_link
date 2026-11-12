@@ -3,7 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon, Play, Video } from "lucide-react";
+import type { PropertyVideoRow } from "@/lib/supabase/database.types";
 
 type GalleryImage = {
   id: string;
@@ -11,22 +12,33 @@ type GalleryImage = {
   alt_text: string | null;
 };
 
+type GalleryVideo = Pick<
+  PropertyVideoRow,
+  "id" | "public_url" | "thumbnail_url" | "caption" | "duration_seconds" | "sort_order"
+>;
+
 /**
  * The original card only ever rendered images[0], but the data model always
  * anticipated a set — this is the gallery that finally uses it.
  */
 export default function PropertyGallery({
   images,
+  videos,
   title,
   propertyType,
 }: {
   images: GalleryImage[];
+  videos: GalleryVideo[];
   title: string;
   propertyType?: string;
 }) {
   const [index, setIndex] = useState(0);
+  const media = [
+    ...images.map((image) => ({ kind: "image" as const, ...image })),
+    ...videos.map((video) => ({ kind: "video" as const, ...video })),
+  ];
 
-  if (images.length === 0) {
+  if (media.length === 0) {
     return (
       <div className="relative w-full aspect-[16/10] rounded-[3rem] bg-zinc-100 dark:bg-zinc-900 flex flex-col items-center justify-center gap-3 border border-zinc-200 dark:border-zinc-800">
         <ImageIcon className="w-12 h-12 text-zinc-300" />
@@ -36,9 +48,10 @@ export default function PropertyGallery({
   }
 
   const go = (delta: number) =>
-    setIndex((current) => (current + delta + images.length) % images.length);
+    setIndex((current) => (current % media.length + delta + media.length) % media.length);
 
-  const active = images[index];
+  const activeIndex = Math.min(index, media.length - 1);
+  const active = media[activeIndex];
 
   return (
     <div className="space-y-4">
@@ -52,21 +65,34 @@ export default function PropertyGallery({
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0"
           >
-            <Image
-              src={active.public_url}
-              alt={`${title} - ${propertyType ?? "rental property"} for rent in Meru, Kenya${active.alt_text?.trim() ? `: ${active.alt_text.trim()}` : ""}`}
-              fill
-              priority={index === 0}
-              loading={index === 0 ? "eager" : "lazy"}
-              fetchPriority={index === 0 ? "high" : undefined}
-              decoding="async"
-              sizes="(max-width: 1024px) 100vw, 60vw"
-              className="object-cover"
-            />
+            {active.kind === "image" ? (
+              <Image
+                src={active.public_url}
+                alt={`${title} - ${propertyType ?? "rental property"} for rent in Meru, Kenya${active.alt_text?.trim() ? `: ${active.alt_text.trim()}` : ""}`}
+                fill
+                priority={activeIndex === 0}
+                loading={activeIndex === 0 ? "eager" : "lazy"}
+                fetchPriority={activeIndex === 0 ? "high" : undefined}
+                decoding="async"
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                className="object-cover"
+              />
+            ) : (
+              <video
+                key={active.id}
+                src={active.public_url}
+                poster={active.thumbnail_url ?? images[0]?.public_url}
+                aria-label={active.caption || `${title} property walkthrough video`}
+                controls
+                playsInline
+                preload="metadata"
+                className="h-full w-full bg-black object-contain"
+              />
+            )}
           </motion.div>
         </AnimatePresence>
 
-        {images.length > 1 && (
+        {media.length > 1 && (
           <>
             <button
               onClick={() => go(-1)}
@@ -83,37 +109,66 @@ export default function PropertyGallery({
               <ChevronRight className="w-6 h-6" />
             </button>
             <div className="absolute bottom-6 right-6 px-4 py-2 rounded-2xl bg-black/40 backdrop-blur-xl text-white text-xs font-black tracking-widest">
-              {index + 1} / {images.length}
+              {active.kind === "video" && <Video className="mr-2 inline-block w-3.5 h-3.5" aria-hidden="true" />}
+              {activeIndex + 1} / {media.length}
             </div>
           </>
         )}
       </div>
 
-      {images.length > 1 && (
+      {media.length > 1 && (
         <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-1">
-          {images.map((image, i) => (
-            <button
-              key={image.id}
-              onClick={() => setIndex(i)}
-              aria-label={`Show photo ${i + 1}`}
-              aria-current={i === index}
-              className={`relative w-28 h-20 shrink-0 rounded-2xl overflow-hidden transition-all ${
-                i === index
-                  ? "ring-2 ring-blue-600 ring-offset-2 ring-offset-[#fafafa] dark:ring-offset-black"
-                  : "opacity-60 hover:opacity-100"
-              }`}
-            >
-              <Image
-                src={image.public_url}
-                alt=""
-                fill
-                sizes="112px"
-                loading="lazy"
-                decoding="async"
-                className="object-cover"
-              />
-            </button>
-          ))}
+          {media.map((item, i) => {
+            const thumbnail = item.kind === "video"
+              ? item.thumbnail_url ?? images[0]?.public_url
+              : null;
+
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={item.kind === "video" ? `Show video ${i + 1}` : `Show photo ${i + 1}`}
+                aria-current={i === activeIndex}
+                className={`relative w-28 h-20 shrink-0 rounded-2xl overflow-hidden transition-all ${
+                  i === activeIndex
+                    ? "ring-2 ring-blue-600 ring-offset-2 ring-offset-[#fafafa] dark:ring-offset-black"
+                    : "opacity-60 hover:opacity-100"
+                }`}
+              >
+                {item.kind === "image" ? (
+                  <Image
+                    src={item.public_url}
+                    alt=""
+                    fill
+                    sizes="112px"
+                    loading="lazy"
+                    decoding="async"
+                    className="object-cover"
+                  />
+                ) : (
+                  <>
+                    {thumbnail ? (
+                      <Image
+                        src={thumbnail}
+                        alt=""
+                        fill
+                        sizes="112px"
+                        loading="lazy"
+                        decoding="async"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="absolute inset-0 bg-zinc-900" />
+                    )}
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/35 text-white">
+                      <Play className="w-6 h-6 fill-current" aria-hidden="true" />
+                    </span>
+                  </>
+                )}
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

@@ -121,6 +121,18 @@ export type PropertyImageRow = {
   created_at: string;
 };
 
+export type PropertyVideoRow = {
+  id: string;
+  property_id: string;
+  storage_path: string | null;
+  public_url: string;
+  thumbnail_url: string | null;
+  caption: string | null;
+  duration_seconds: number | null;
+  sort_order: number;
+  created_at: string;
+};
+
 export type PropertyAmenityRow = {
   property_id: string;
   amenity_id: string;
@@ -314,6 +326,12 @@ export type Database = {
         Row: PropertyImageRow;
         Insert: Insertable<PropertyImageRow, "property_id" | "public_url">;
         Update: Partial<PropertyImageRow>;
+        Relationships: [];
+      };
+      property_videos: {
+        Row: PropertyVideoRow;
+        Insert: Insertable<PropertyVideoRow, "property_id" | "public_url">;
+        Update: Partial<PropertyVideoRow>;
         Relationships: [];
       };
       property_amenities: {

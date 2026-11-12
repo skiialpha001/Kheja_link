@@ -22,6 +22,12 @@ const LIST_SELECT = `
   images:property_images ( id, public_url, alt_text, is_cover, sort_order )
 ` as const;
 
+const DETAIL_SELECT = `
+  ${LIST_SELECT},
+  property_videos ( id, public_url, thumbnail_url, caption, duration_seconds, sort_order ),
+  property_amenities ( amenities ( id, slug, name, icon, sort_order ) )
+` as const;
+
 const DEFAULT_PER_PAGE = 12;
 const MAX_PER_PAGE = 48;
 
@@ -70,7 +76,8 @@ export async function getProperties(filters: PropertyFilters = {}): Promise<Pagi
   let query = supabase
     .from("properties")
     .select(LIST_SELECT, { count: "exact" })
-    .eq("status", "published");
+    .eq("status", "published")
+    .eq("is_demo", false);
 
   if (filters.q?.trim()) {
     // websearch_to_tsquery understands quoted phrases and OR, and never throws
@@ -193,6 +200,7 @@ export async function getPropertiesForLocations(
     .from("properties")
     .select(LIST_SELECT, { count: "exact" })
     .eq("status", "published")
+    .eq("is_demo", false)
     .in("location_id", locationIds)
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(safePerPage);
@@ -213,13 +221,9 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | 
 
   const { data, error } = await supabase
     .from("properties")
-    .select(
-      `
-      ${LIST_SELECT},
-      property_amenities ( amenities ( id, slug, name, icon, sort_order ) )
-    `,
-    )
+    .select(DETAIL_SELECT)
     .eq("slug", slug)
+    .eq("is_demo", false)
     .maybeSingle();
 
   if (error) throw new Error(`Could not load property: ${error.message}`);
@@ -227,6 +231,7 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | 
 
   const raw = data as unknown as PropertyListItem & {
     property_amenities: { amenities: PropertyDetail["amenities"][number] | null }[] | null;
+    property_videos: PropertyDetail["videos"] | null;
   };
 
   // The owner comes from the public_profiles view, which deliberately omits
@@ -247,6 +252,7 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | 
       .map((row) => row.amenities)
       .filter((a): a is PropertyDetail["amenities"][number] => Boolean(a))
       .sort((a, b) => a.sort_order - b.sort_order),
+    videos: [...(raw.property_videos ?? [])].sort((a, b) => a.sort_order - b.sort_order),
   };
 }
 
@@ -261,6 +267,7 @@ export async function getSimilarProperties(
     .from("properties")
     .select(LIST_SELECT)
     .eq("status", "published")
+    .eq("is_demo", false)
     .neq("id", property.id)
     .or(`property_type_id.eq.${property.property_type_id},location_id.eq.${property.location_id}`)
     .order("published_at", { ascending: false, nullsFirst: false })

@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       .from("properties")
       .select("slug, is_demo, updated_at, location:locations ( slug )")
       .eq("status", "published")
+      .eq("is_demo", false)
       .order("published_at", { ascending: false })
       .limit(1000);
 

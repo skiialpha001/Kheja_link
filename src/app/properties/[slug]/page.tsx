@@ -6,8 +6,7 @@ import {
   Bath,
   Square,
   MapPin,
-  Phone,
-  MessageCircle,
+  PhoneOff,
   ShieldCheck,
   CalendarDays,
   Eye,
@@ -35,8 +34,6 @@ import {
   formatRelativeDate,
   formatRent,
   formatSize,
-  normalisePhone,
-  whatsappLink,
 } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -53,13 +50,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const where = property.location?.name ?? "Meru";
   const rent = formatRent(property.price_amount, property.price_period, property.price_currency);
   const type = property.property_type?.name ?? "Rental";
-  const deposit = `${property.deposit_months} ${property.deposit_months === 1 ? "month" : "months"} deposit stated`;
+  const deposit = property.deposit_months > 0
+    ? `${property.deposit_months} ${property.deposit_months === 1 ? "month" : "months"} deposit stated`
+    : "";
   const amenityNames = property.amenities.map((amenity) => amenity.name).slice(0, 3).join(", ");
   const descriptionText = property.description?.replace(/\s+/g, " ").trim();
   const description = [
     isDemoListing ? "DEMO listing, not a real rental. " : "",
     `${property.title}: ${type} for rent in ${where}, Meru.`,
-    `Listed rent ${rent}; ${deposit}.`,
+    deposit ? `Listed rent ${rent}; ${deposit}.` : `Listed rent ${rent}.`,
     amenityNames ? `Features include ${amenityNames}.` : "",
     descriptionText || "Contact the lister to confirm availability and viewing details.",
   ].filter(Boolean).join(" ").slice(0, 160);
@@ -118,11 +117,6 @@ export default async function PropertyDetailPage({
 
   if (property.status === "published" && !isDemoListing) void recordPropertyView(property.id);
 
-  const phone = normalisePhone(property.contact_phone);
-  const whatsapp = whatsappLink(
-    property.contact_whatsapp ?? property.contact_phone,
-    `Hi, I saw "${property.title}" on Kheja_Link. Is it still available?`,
-  );
   const size = formatSize(property.size_sqft);
   const availability = availabilityLabel(property.availability, property.available_from);
   const siteUrl = getSiteUrl();
@@ -180,7 +174,7 @@ export default async function PropertyDetailPage({
     property.bedrooms > 0 && { icon: BedDouble, label: "Bedrooms", value: String(property.bedrooms) },
     property.bathrooms > 0 && { icon: Bath, label: "Bathrooms", value: String(property.bathrooms) },
     size && { icon: Square, label: "Size", value: size },
-    {
+    property.deposit_months > 0 && {
       icon: Wallet,
       label: "Deposit",
       value: `${property.deposit_months} ${property.deposit_months === 1 ? "month" : "months"}`,
@@ -307,6 +301,7 @@ export default async function PropertyDetailPage({
               <div className="space-y-8 sm:space-y-12 min-w-0">
               <PropertyGallery
                 images={property.images}
+                videos={property.videos}
                 title={property.title}
                 propertyType={property.property_type?.name}
               />
@@ -385,8 +380,8 @@ export default async function PropertyDetailPage({
                   {!isOwner && (
                     <p className="flex items-start gap-2 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 text-sm font-bold text-zinc-500">
                       <Lock className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
-                      The exact street, building and Google Maps pin open with the landlord&apos;s
-                      contact when you tap &ldquo;Unlock contact&rdquo; in the app.
+                      Landlord contact details and the exact street address are temporarily
+                      unavailable. This page shows the approximate area only.
                     </p>
                   )}
                 </div>
@@ -430,51 +425,37 @@ export default async function PropertyDetailPage({
                 )}
 
                 <div className="space-y-3">
-                  {phone && (
-                    <a
-                      href={`tel:${phone}`}
-                      className="w-full h-14 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl font-black flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform"
-                    >
-                      <Phone className="w-5 h-5" />
-                      Call landlord
-                    </a>
-                  )}
-                  {whatsapp && (
-                    <a
-                      href={whatsapp}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full h-14 bg-emerald-600 text-white rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-emerald-700 transition-colors"
-                    >
-                      <MessageCircle className="w-5 h-5" />
-                      WhatsApp
-                    </a>
-                  )}
+                  <button
+                    type="button"
+                    disabled
+                    aria-disabled="true"
+                    title="Landlord call details are temporarily unavailable"
+                    className="w-full min-h-14 bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 rounded-2xl font-black flex items-center justify-center gap-2 cursor-not-allowed"
+                  >
+                    <PhoneOff className="w-5 h-5" aria-hidden="true" />
+                    Call details temporarily unavailable
+                  </button>
                 </div>
               </div>
 
               {!isOwner && (
-                <div className="p-5 sm:p-8 bg-blue-700 text-white rounded-3xl space-y-5">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-blue-100">
-                    <Lock className="w-4 h-4" />
-                    Unlock contact
+                <div className="p-5 sm:p-8 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-3xl space-y-4">
+                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
+                    <Lock className="w-4 h-4" aria-hidden="true" />
+                    Contact details unavailable
                   </div>
-                  {/* No price here on purpose: the amount first appears on the payment
-                      screen in the app, after the tenant taps "Unlock contact". */}
-                  <p className="text-xl sm:text-2xl font-bold tracking-tight">
-                    Get the landlord&apos;s and caretaker&apos;s numbers, the exact address and the
-                    map pin.
+                  <p className="text-sm font-medium leading-relaxed">
+                    Landlord call details are temporarily disabled. You can still use the inquiry
+                    form below to ask about this listing.
                   </p>
-                  <p className="text-sm font-medium text-blue-50 leading-relaxed">
-                    Tap &ldquo;Unlock contact&rdquo; on this home in the Kheja_Link app. The
-                    contacts, exact address and map pin stay open for 3 hours.
-                  </p>
-                  <Link
-                    href="/#get-the-app"
-                    className="w-full min-h-14 bg-white text-blue-700 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-50 transition-colors"
+                  <button
+                    type="button"
+                    disabled
+                    aria-disabled="true"
+                    className="w-full min-h-14 bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 rounded-2xl font-bold cursor-not-allowed"
                   >
-                    Unlock in the app
-                  </Link>
+                    Contact details temporarily unavailable
+                  </button>
                 </div>
               )}
 

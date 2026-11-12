@@ -5,6 +5,7 @@ import type {
   PropertyImageRow,
   PropertyRow,
   PropertyTypeRow,
+  PropertyVideoRow,
   PublicProfileRow,
 } from "./supabase/database.types";
 
@@ -23,6 +24,10 @@ export type PropertyListItem = PropertyRow & {
 export type PropertyDetail = PropertyListItem & {
   owner: PublicProfileRow | null;
   amenities: AmenityRow[];
+  videos: Pick<
+    PropertyVideoRow,
+    "id" | "public_url" | "thumbnail_url" | "caption" | "duration_seconds" | "sort_order"
+  >[];
 };
 
 export type InquiryWithProperty = InquiryRow & {
