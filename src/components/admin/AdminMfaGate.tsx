@@ -2,7 +2,9 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { LoaderCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { BrandedLoadingIndicator } from "@/components/RouteLoadingScreen";
 
 type GateState = "loading" | "enrolling" | "challenge";
 
@@ -114,7 +116,9 @@ export default function AdminMfaGate() {
       </p>
 
       {state === "loading" ? (
-        <p className="mt-6 text-sm text-zinc-500" role="status">Checking your security factors…</p>
+        <div className="mt-8 rounded-3xl border border-zinc-200 bg-zinc-50 py-8 dark:border-zinc-800 dark:bg-zinc-900/70">
+          <BrandedLoadingIndicator label="Checking admin security for" />
+        </div>
       ) : (
         <>
           {state === "enrolling" && qrCode && (
@@ -146,7 +150,11 @@ export default function AdminMfaGate() {
               disabled={busy || !factorId}
               type="submit"
             >
-              {busy ? "Verifying…" : state === "enrolling" ? "Enable MFA and continue" : "Continue to admin"}
+              {busy ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" /> Verifying…
+                </span>
+              ) : state === "enrolling" ? "Enable MFA and continue" : "Continue to admin"}
             </button>
           </form>
           {error && !factorId && (

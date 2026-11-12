@@ -9,6 +9,7 @@ import '../models/models.dart';
 import '../services/kheja_api.dart';
 import '../widgets/property_card.dart';
 import '../widgets/partner_rails.dart';
+import '../widgets/raph_contact_card.dart';
 import '../widgets/states.dart';
 import '../widgets/unlock_card.dart';
 import '../widgets/kheja_sheet.dart';
@@ -330,6 +331,9 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
 
                   const SizedBox(height: 34),
                   _LandlordCard(property: property),
+
+                  const SizedBox(height: 14),
+                  RaphContactCard(propertyTitle: property.title),
 
                   const SizedBox(height: 20),
                   UnlockCard(

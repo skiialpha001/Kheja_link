@@ -6,8 +6,6 @@ import {
   Bath,
   Square,
   MapPin,
-  PhoneOff,
-  ShieldCheck,
   CalendarDays,
   Eye,
   Wallet,
@@ -19,10 +17,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyGallery from "@/components/PropertyGallery";
+import PropertyContactActions from "@/components/PropertyContactActions";
 import InquiryForm from "@/components/InquiryForm";
 import StructuredData from "@/components/StructuredData";
 import FavoriteButton from "@/components/FavoriteButton";
-import { getPropertyBySlug, getSimilarProperties, recordPropertyView } from "@/lib/queries/properties";
+import { getPropertyBySlug, getPropertyContact, getSimilarProperties, recordPropertyView } from "@/lib/queries/properties";
+import { getUnlockPricing } from "@/lib/queries/pricing";
 import { getFavoriteIds, withFavoriteState } from "@/lib/queries/favorites";
 import { getCurrentProfile, getCurrentUser } from "@/lib/supabase/server";
 import { getMeruAreaPathForLocation } from "@/lib/seo/meru-rental-areas";
@@ -31,7 +31,6 @@ import { canonicalAlternates } from "@/lib/seo/metadata";
 import {
   availabilityLabel,
   formatLocation,
-  formatRelativeDate,
   formatRent,
   formatSize,
 } from "@/lib/format";
@@ -112,6 +111,10 @@ export default async function PropertyDetailPage({
   const [favoriteIds, similar] = await Promise.all([
     getFavoriteIds(),
     getSimilarProperties(property),
+  ]);
+  const [unlockedContact, unlockPricing] = await Promise.all([
+    user ? getPropertyContact(property.id) : Promise.resolve(null),
+    getUnlockPricing(),
   ]);
   const similarWithState = await withFavoriteState(similar);
 
@@ -377,11 +380,10 @@ export default async function PropertyDetailPage({
                       {property.nearby}
                     </p>
                   )}
-                  {!isOwner && (
+                  {!unlockedContact && !isDemoListing && (
                     <p className="flex items-start gap-2 p-4 rounded-2xl bg-zinc-50 dark:bg-zinc-800/60 text-sm font-bold text-zinc-500">
                       <Lock className="w-4 h-4 mt-0.5 shrink-0 text-blue-600" />
-                      Landlord contact details and the exact street address are temporarily
-                      unavailable. This page shows the approximate area only.
+                      The exact street address and landlord contact are available after the paid unlock. This page shows the approximate area until then.
                     </p>
                   )}
                 </div>
@@ -390,74 +392,19 @@ export default async function PropertyDetailPage({
 
             {/* Right column — sticky contact rail */}
             <aside id="contact" className="space-y-6 lg:sticky lg:top-32 lg:self-start scroll-mt-32">
-              {isDemoListing ? (
-                <div className="rounded-3xl border border-amber-300 bg-amber-50 p-5 sm:p-8 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
-                  <p className="text-xs font-black uppercase tracking-widest">Demo listing · Not real</p>
-                  <h2 className="mt-3 text-xl font-black">Interface sample only</h2>
-                  <p className="mt-3 text-sm font-medium leading-relaxed">
-                    This fictional entry is here to preview the listings interface. It is not available to rent. There is no real landlord, contact, address, or payment to make. Do not visit or send money.
-                  </p>
-                </div>
-              ) : (
-                <>
-              <div className="p-5 sm:p-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-3xl space-y-6">
-                <div className="flex items-center gap-4">
-                  <span className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl font-black">
-                    {property.owner?.full_name?.[0]?.toUpperCase() ?? "K"}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="font-black text-zinc-900 dark:text-white truncate">
-                      {property.owner?.full_name ?? "Kheja_Link Landlord"}
-                    </p>
-                    <p className="flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                      {property.owner?.is_verified && (
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                      )}
-                      {property.owner?.is_verified ? "Verified landlord" : "Landlord"}
-                    </p>
-                  </div>
-                </div>
-
-                {property.published_at && (
-                  <p className="text-xs font-bold text-zinc-400">
-                    Listed {formatRelativeDate(property.published_at).toLowerCase()}
-                  </p>
-                )}
-
-                <div className="space-y-3">
-                  <button
-                    type="button"
-                    disabled
-                    aria-disabled="true"
-                    title="Landlord call details are temporarily unavailable"
-                    className="w-full min-h-14 bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 rounded-2xl font-black flex items-center justify-center gap-2 cursor-not-allowed"
-                  >
-                    <PhoneOff className="w-5 h-5" aria-hidden="true" />
-                    Call details temporarily unavailable
-                  </button>
-                </div>
-              </div>
-
-              {!isOwner && (
-                <div className="p-5 sm:p-8 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-3xl space-y-4">
-                  <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">
-                    <Lock className="w-4 h-4" aria-hidden="true" />
-                    Contact details unavailable
-                  </div>
-                  <p className="text-sm font-medium leading-relaxed">
-                    Landlord call details are temporarily disabled. You can still use the inquiry
-                    form below to ask about this listing.
-                  </p>
-                  <button
-                    type="button"
-                    disabled
-                    aria-disabled="true"
-                    className="w-full min-h-14 bg-zinc-200 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 rounded-2xl font-bold cursor-not-allowed"
-                  >
-                    Contact details temporarily unavailable
-                  </button>
-                </div>
-              )}
+              <PropertyContactActions
+                propertyId={property.id}
+                propertyTitle={property.title}
+                propertySlug={property.slug}
+                ownerName={property.owner?.full_name ?? "Kheja_Link Landlord"}
+                isVerified={Boolean(property.owner?.is_verified)}
+                isSignedIn={Boolean(user)}
+                canUnlock={!isDemoListing}
+                defaultPhone={profile?.phone}
+                unlockFee={unlockPricing.unlockFee}
+                currency={unlockPricing.currency}
+                contact={unlockedContact}
+              />
 
               <InquiryForm
                 key={reporting ? "report" : "message"}
@@ -469,7 +416,7 @@ export default async function PropertyDetailPage({
                 defaultPhone={profile?.phone}
               />
 
-              {!isOwner && (
+              {!isOwner && !isDemoListing && (
                 <p className="text-center">
                   <Link
                     href={reporting ? `/properties/${property.slug}#contact` : `/properties/${property.slug}?report=1#contact`}
@@ -479,8 +426,6 @@ export default async function PropertyDetailPage({
                     {reporting ? "Ask a question instead" : "Report this listing"}
                   </Link>
                 </p>
-              )}
-                </>
               )}
 
               <p className="px-4 text-xs font-medium text-zinc-400 leading-relaxed text-center">

@@ -5,6 +5,7 @@ import type {
   PropertyFilters,
   PropertyListItem,
   PropertySort,
+  UnlockedPropertyContact,
 } from "@/lib/types";
 
 /** Columns a property card needs, joined in one round-trip. */
@@ -254,6 +255,29 @@ export async function getPropertyBySlug(slug: string): Promise<PropertyDetail | 
       .sort((a, b) => a.sort_order - b.sort_order),
     videos: [...(raw.property_videos ?? [])].sort((a, b) => a.sort_order - b.sort_order),
   };
+}
+
+/**
+ * Read private landlord details through the database entitlement function.
+ * No private columns are selected from `properties`; the function returns
+ * contact data only to the listing owner, an admin, or a tenant with an
+ * active paid unlock.
+ */
+export async function getPropertyContact(
+  propertyId: string,
+): Promise<UnlockedPropertyContact | null> {
+  const supabase = await createClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return null;
+
+  const { data, error } = await supabase.rpc("get_property_contact", {
+    p_property_id: propertyId,
+  });
+  if (error) return null;
+
+  const row = data?.[0];
+  if (!row?.unlocked) return null;
+  return row as UnlockedPropertyContact;
 }
 
 /** Other listings a visitor is likely to want next. */

@@ -426,6 +426,24 @@ export type Database = {
           building_name: string | null;
         }[];
       };
+      get_property_contact: {
+        Args: { p_property_id: string };
+        Returns: {
+          unlocked: boolean;
+          unlocked_until: string | null;
+          landlord_name: string | null;
+          contact_phone: string | null;
+          contact_whatsapp: string | null;
+          caretaker_name: string | null;
+          caretaker_phone: string | null;
+          management_name: string | null;
+          management_phone: string | null;
+          address_line: string | null;
+          building_name: string | null;
+          latitude: number | null;
+          longitude: number | null;
+        }[];
+      };
       run_daily_maintenance: {
         Args: Record<string, never>;
         Returns: Record<string, unknown>;

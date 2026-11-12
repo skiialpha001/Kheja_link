@@ -30,6 +30,23 @@ export type PropertyDetail = PropertyListItem & {
   >[];
 };
 
+/** Private contact details returned only by the database after an unlock or ownership check. */
+export type UnlockedPropertyContact = {
+  unlocked: true;
+  unlocked_until: string | null;
+  landlord_name: string | null;
+  contact_phone: string | null;
+  contact_whatsapp: string | null;
+  caretaker_name: string | null;
+  caretaker_phone: string | null;
+  management_name: string | null;
+  management_phone: string | null;
+  address_line: string | null;
+  building_name: string | null;
+  latitude: number | null;
+  longitude: number | null;
+};
+
 export type InquiryWithProperty = InquiryRow & {
   property: Pick<PropertyRow, "id" | "title" | "slug"> | null;
 };
