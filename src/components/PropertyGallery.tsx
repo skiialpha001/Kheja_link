@@ -3,8 +3,9 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, ImageIcon, Play, Video } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon, Maximize2, Play, Video } from "lucide-react";
 import type { PropertyVideoRow } from "@/lib/supabase/database.types";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 type GalleryImage = {
   id: string;
@@ -33,6 +34,7 @@ export default function PropertyGallery({
   propertyType?: string;
 }) {
   const [index, setIndex] = useState(0);
+  const [viewerOpen, setViewerOpen] = useState(false);
   const media = [
     ...images.map((image) => ({ kind: "image" as const, ...image })),
     ...videos.map((video) => ({ kind: "video" as const, ...video })),
@@ -64,6 +66,30 @@ export default function PropertyGallery({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0"
+            role={active.kind === "image" ? "button" : undefined}
+            tabIndex={active.kind === "image" ? 0 : undefined}
+            aria-label={active.kind === "image" ? `Open ${title} photo in full screen` : undefined}
+            onClick={(event) => {
+              if ((event.target as HTMLElement).closest("button")) return;
+              if (active.kind === "image") {
+                setViewerOpen(true);
+                return;
+              }
+
+              // Leave the native controls at the bottom of the video usable.
+              const bounds = event.currentTarget.getBoundingClientRect();
+              if (bounds.bottom - event.clientY > 56) setViewerOpen(true);
+            }}
+            onKeyDown={(event) => {
+              if (
+                active.kind === "image" &&
+                !((event.target as HTMLElement).closest("button")) &&
+                (event.key === "Enter" || event.key === " ")
+              ) {
+                event.preventDefault();
+                setViewerOpen(true);
+              }
+            }}
           >
             {active.kind === "image" ? (
               <Image
@@ -84,13 +110,26 @@ export default function PropertyGallery({
                 poster={active.thumbnail_url ?? images[0]?.public_url}
                 aria-label={active.caption || `${title} property walkthrough video`}
                 controls
+                muted
                 playsInline
                 preload="metadata"
+                onVolumeChange={(event) => {
+                  if (!event.currentTarget.muted) event.currentTarget.muted = true;
+                }}
                 className="h-full w-full bg-black object-contain"
               />
             )}
           </motion.div>
         </AnimatePresence>
+
+        <button
+          type="button"
+          onClick={() => setViewerOpen(true)}
+          aria-label="View photo or video full screen"
+          className="absolute right-6 top-6 z-10 flex h-11 w-11 items-center justify-center rounded-xl border border-white/30 bg-black/50 text-white shadow-lg backdrop-blur-sm transition hover:bg-black/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        >
+          <Maximize2 className="h-5 w-5" aria-hidden="true" />
+        </button>
 
         {media.length > 1 && (
           <>
@@ -171,6 +210,40 @@ export default function PropertyGallery({
           })}
         </div>
       )}
+
+      <Dialog open={viewerOpen} onOpenChange={setViewerOpen}>
+        <DialogContent
+          showCloseButton
+          className="!fixed !inset-0 !left-0 !top-0 !flex !h-[100dvh] !w-screen !max-w-none !translate-x-0 !translate-y-0 !items-center !justify-center !rounded-none !border-0 !p-0 bg-black text-white"
+        >
+          <DialogTitle className="sr-only">
+            {title} {active.kind === "image" ? "photo" : "video"}
+          </DialogTitle>
+          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            {active.kind === "image" ? (
+              <Image
+                src={active.public_url}
+                alt={`${title} - ${propertyType ?? "rental property"} for rent in Meru, Kenya`}
+                fill
+                sizes="100vw"
+                className="object-contain"
+                priority
+              />
+            ) : (
+              <video
+                src={active.public_url}
+                poster={active.thumbnail_url ?? images[0]?.public_url}
+                aria-label={active.caption || `${title} property walkthrough video`}
+                controls
+                muted
+                playsInline
+                preload="auto"
+                className="h-full w-full object-contain"
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
